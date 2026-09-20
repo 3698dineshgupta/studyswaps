@@ -138,10 +138,10 @@ export default function AdminUsersPage() {
       key: 'actions',
       label: 'Actions',
       render: (user: UserWithDetails) => (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
           <button
             onClick={() => setSelectedUser(user)}
-            className="text-xs text-blue-600 hover:underline"
+            className="py-1 text-sm font-semibold text-blue-600 hover:underline"
           >
             View
           </button>
@@ -149,13 +149,13 @@ export default function AdminUsersPage() {
             <>
               <button
                 onClick={() => setActionModal({ type: 'suspend', user })}
-                className="text-xs text-yellow-600 hover:underline"
+                className="py-1 text-sm font-semibold text-yellow-600 hover:underline"
               >
                 Suspend
               </button>
               <button
                 onClick={() => setActionModal({ type: 'ban', user })}
-                className="text-xs text-red-600 hover:underline"
+                className="py-1 text-sm font-semibold text-red-600 hover:underline"
               >
                 Ban
               </button>
@@ -164,7 +164,7 @@ export default function AdminUsersPage() {
           {(user.account_status === 'SUSPENDED' || user.account_status === 'BANNED') && (
             <button
               onClick={() => setActionModal({ type: 'activate', user })}
-              className="text-xs text-green-600 hover:underline"
+              className="py-1 text-sm font-semibold text-green-600 hover:underline"
             >
               Activate
             </button>
@@ -183,12 +183,9 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
         {[
           { label: 'Total Users', value: total },
-          { label: 'Verified', value: '—' },
-          { label: 'Pending', value: '—' },
-          { label: 'Suspended', value: '—' },
         ].map((stat) => (
           <div key={stat.label} className="bg-white rounded-xl border border-gray-200 p-4">
             <p className="text-sm text-gray-500">{stat.label}</p>

@@ -151,21 +151,21 @@ export default function AdminVerificationPage() {
       key: 'actions',
       label: 'Actions',
       render: (req: VerificationRequest) => (
-        <div className="flex items-center gap-2">
-          <button onClick={() => setSelected(req)} className="text-xs text-blue-600 hover:underline">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
+          <button onClick={() => setSelected(req)} className="py-1 text-sm font-semibold text-blue-600 hover:underline">
             Review
           </button>
           {(req.status === 'PENDING' || req.status === 'UNDER_REVIEW') && (
             <>
               <button
                 onClick={() => setReviewModal({ request: req, action: 'approve' })}
-                className="text-xs text-green-600 hover:underline"
+                className="py-1 text-sm font-semibold text-green-600 hover:underline"
               >
                 Approve
               </button>
               <button
                 onClick={() => setReviewModal({ request: req, action: 'reject' })}
-                className="text-xs text-red-600 hover:underline"
+                className="py-1 text-sm font-semibold text-red-600 hover:underline"
               >
                 Reject
               </button>

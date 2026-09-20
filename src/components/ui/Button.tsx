@@ -12,7 +12,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', loading, fullWidth, disabled, children, ...props }, ref) => {
-    const base = 'inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-200 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none';
+    const base = 'inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-200 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none text-center leading-tight';
 
     const variants = {
       primary: 'bg-green-600 hover:bg-green-700 active:bg-green-800 text-white focus:ring-green-500 shadow-sm hover:shadow',
@@ -24,10 +24,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const sizes = {
-      xs: 'h-7 px-3 text-xs',
-      sm: 'h-9 px-4 text-sm',
-      md: 'h-11 px-5 text-sm',
-      lg: 'h-12 px-6 text-base',
+      xs: 'min-h-[28px] px-3 py-1 text-xs',
+      sm: 'min-h-[36px] px-4 py-1.5 text-sm',
+      md: 'min-h-[44px] px-5 py-2 text-sm',
+      lg: 'min-h-[48px] px-4 py-2.5 text-[15px] sm:px-6 sm:text-base',
     };
 
     return (

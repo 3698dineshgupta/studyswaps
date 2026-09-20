@@ -2,12 +2,11 @@
  * Seller earnings: held → withdrawable. Server-side (service role) ONLY.
  *
  *  1. Buyer pays            → seller's PENDING balance += (item price − 5% commission)
- *  2. Buyer confirms receipt → PENDING → AVAILABLE immediately
- *     — or, if the buyer doesn't respond, 3 days after DELIVERED (unless a return was requested)
+ *  2. Order marked DELIVERED (by StudentMarket) → PENDING → AVAILABLE immediately
  *  3. Seller withdraws from AVAILABLE to eSewa.
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { commissionFor, WITHDRAWAL } from '@/lib/pricing'
+import { commissionFor } from '@/lib/pricing'
 import { notify } from '@/lib/notify'
 
 export interface ReleaseOutcome { released: boolean; amount?: number; reason?: string }
@@ -63,33 +62,26 @@ export async function releaseOrderFunds(admin: SupabaseClient, orderId: string):
 }
 
 /**
- * Auto-release for a seller: any order DELIVERED at least `releaseDays` ago with no return request.
- * Called whenever the seller opens their wallet, so no background job is needed.
+ * Release for a seller: every order that has been DELIVERED (or confirmed/completed) becomes withdrawable.
+ * Called whenever the seller opens their wallet or dashboard, so it also catches up on orders delivered earlier.
  */
 export async function releaseDueFunds(admin: SupabaseClient, sellerId: string): Promise<number> {
-  const cutoff = Date.now() - WITHDRAWAL.releaseDays * 24 * 60 * 60 * 1000
-
   const { data: orders } = await admin
     .from('orders')
-    .select('id, status, deliveries(delivery_events(status, created_at))')
+    .select('id')
     .eq('seller_id', sellerId)
     .in('status', ['DELIVERED', 'BUYER_CONFIRMED', 'COMPLETED'])
     .limit(100)
 
   let count = 0
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  for (const o of (orders ?? []) as any[]) {
-    const events: any[] = (Array.isArray(o.deliveries) ? o.deliveries[0] : o.deliveries)?.delivery_events ?? []
-    const deliveredAt = events.filter((e) => e.status === 'DELIVERED').map((e) => +new Date(e.created_at)).sort((a, b) => a - b)[0]
-    const due = o.status !== 'DELIVERED' || (deliveredAt !== undefined && deliveredAt <= cutoff)
-    if (!due) continue
+  for (const o of orders ?? []) {
     const r = await releaseOrderFunds(admin, o.id)
     if (r.released) count++
   }
   return count
 }
 
-/** When funds for a delivered order will unlock, for display ("Available on Sep 24"). */
+/** Kept for callers that show an unlock date: earnings unlock the moment the order is delivered. */
 export function releaseDateFor(deliveredAt: string | Date): Date {
-  return new Date(+new Date(deliveredAt) + WITHDRAWAL.releaseDays * 24 * 60 * 60 * 1000)
+  return new Date(deliveredAt)
 }

@@ -40,7 +40,27 @@ export default function AdminTable<T extends { id: string }>({ columns, data, lo
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-      <div className="overflow-x-auto">
+      {/* Phones: one card per row (name first, details as label/value pairs, actions last) */}
+      <ul className="divide-y divide-gray-100 md:hidden">
+        {data.map((row) => {
+          const [first, ...rest] = columns;
+          const cell = (col: Column<T>) => (col.render ? col.render(row) : String((row as Record<string, unknown>)[col.key] ?? '—'));
+          const actions = rest.filter((c) => c.key === 'actions');
+          const details = rest.filter((c) => c.key !== 'actions');
+          return (
+            <li key={row.id} className="space-y-2.5 p-4">
+              <div className="min-w-0 text-sm">{cell(first)}</div>
+              <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                {details.map((col) => (
+                  <div key={col.key} className="min-w-0"><dt className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">{col.label}</dt><dd className="mt-0.5 break-words text-gray-800">{cell(col)}</dd></div>
+                ))}
+              </dl>
+              {actions.map((col) => <div key={col.key} className="border-t border-gray-100 pt-2.5 text-sm">{cell(col)}</div>)}
+            </li>
+          );
+        })}
+      </ul>
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-100">
@@ -65,7 +85,7 @@ export default function AdminTable<T extends { id: string }>({ columns, data, lo
         </table>
       </div>
       {page !== undefined && pageSize && total !== undefined && onPageChange && (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 text-sm text-gray-500">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-t border-gray-100 text-sm text-gray-500">
           <span>
             {Math.min((page - 1) * pageSize + 1, total)}–{Math.min(page * pageSize, total)} of {total}
           </span>

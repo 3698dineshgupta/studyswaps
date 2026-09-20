@@ -54,7 +54,7 @@ export async function adminSetOrderStatus(ctx: AdminContext, orderId: string, st
       if (p) await admin.from('products').update({ quantity: Number(p.quantity ?? 0) + Number(it.quantity ?? 1), ...(p.status === 'SOLD' ? { status: 'ACTIVE' } : {}) }).eq('id', it.product_id)
     }
   }
-  if ((status === 'BUYER_CONFIRMED' || status === 'COMPLETED') && wasPaid) await releaseOrderFunds(admin, orderId)
+  if ((status === 'DELIVERED' || status === 'BUYER_CONFIRMED' || status === 'COMPLETED') && wasPaid) await releaseOrderFunds(admin, orderId)
 
   const words = LABEL[status] ?? status.toLowerCase()
   await Promise.all([

@@ -91,3 +91,10 @@ export function isOwnCloudinaryProductUrl(url: string): boolean {
   if (!cfg) return false
   return url.startsWith(`https://res.cloudinary.com/${cfg.cloudName}/image/upload/`) && url.includes('/studentmarket/products/')
 }
+
+/** True only for payout screenshots WE uploaded (our cloud, our payouts folder). */
+export function isOwnCloudinaryPayoutUrl(url: string): boolean {
+  const cfg = getConfig()
+  if (!cfg) return false
+  return url.startsWith(`https://res.cloudinary.com/${cfg.cloudName}/image/upload/`) && url.includes(`/studentmarket/payouts/`)
+}

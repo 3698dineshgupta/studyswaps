@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 import { ArrowRight, Clock, Eye, Info, Package, Plus, ShoppingBag, Wallet } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { releaseDueFunds } from '@/lib/wallet/release';
 import { RevealGroup, RevealItem } from '@/components/ui/Reveal';
 import { ORDER_STATUS_LABELS } from '@/lib/constants';
 import { SELLER_COMMISSION_RATE, WITHDRAWAL } from '@/lib/pricing';
@@ -19,6 +21,9 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase.from('profiles').select('id, full_name').eq('auth_user_id', user.id).single();
   if (!profile) redirect('/login');
+
+  // Delivered orders unlock their earnings before the balances are read
+  await releaseDueFunds(createAdminClient(), profile.id).catch(() => 0);
 
   const [wallet, listings, orders, active, review] = await Promise.all([
     supabase.from('wallets').select('available_balance, pending_balance, total_earned').eq('seller_id', profile.id).maybeSingle(),

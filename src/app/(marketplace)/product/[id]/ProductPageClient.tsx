@@ -161,10 +161,10 @@ function ProductView({ product, id }: { product: any; id: string }) {
 
   const cartButton = (className?: string) => inCart > 0 ? (
     <div className={cn('flex gap-2', className)}>
-      <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={() => router.push('/cart')} className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full border-2 border-green-600 bg-green-50 px-4 text-sm font-bold text-green-800">
-        <Check className="h-4 w-4" strokeWidth={3} /> In cart · View cart
+      <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={() => router.push('/cart')} className="flex h-12 min-w-0 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border-2 border-green-600 bg-green-50 px-3 text-sm font-bold text-green-800">
+        <Check className="h-4 w-4 shrink-0" strokeWidth={3} /> View cart
       </motion.button>
-      <button type="button" onClick={() => decrement()} aria-label="Remove from cart" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-gray-200 bg-white text-gray-400 transition-colors hover:border-red-200 hover:text-red-500"><X className="h-4 w-4" /></button>
+      <button type="button" onClick={() => decrement()} aria-label="Remove from cart" className="flex h-12 w-10 shrink-0 items-center justify-center rounded-full border-2 border-gray-200 bg-white text-gray-400 transition-colors hover:border-red-200 hover:text-red-500"><X className="h-4 w-4" /></button>
     </div>
   ) : (
     <motion.button type="button" whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }} onClick={onAdd} disabled={sold} aria-label={`Add ${product.title} to cart`} className={cn('flex h-12 items-center justify-center gap-2 rounded-full border-2 border-ink bg-white px-5 text-sm font-bold text-ink transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50', className)}>
@@ -307,12 +307,12 @@ function ProductView({ product, id }: { product: any; id: string }) {
         className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200/70 bg-white/90 shadow-[0_-12px_30px_-18px_rgba(20,23,28,0.35)] backdrop-blur-xl lg:hidden"
       >
         <div className="flex items-center gap-3 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3">
-          <div className="min-w-0 shrink-0">
+          <div className={cn('min-w-0 shrink-0', inCart > 0 && 'hidden')}>
             <p className="text-[11px] font-medium text-ink-muted">Price</p>
             <p className="font-display text-xl font-extrabold leading-none text-ink">{formatPrice(Number(product.price))}</p>
           </div>
-          {cartButton('flex-1 [&>button:first-child]:px-3')}
-          <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={onBuyNow} disabled={sold || isAdding} className="btn-primary h-12 flex-1 rounded-full px-4 text-sm font-bold shadow-[0_12px_26px_-12px_rgba(22,163,74,0.85)]">Buy Now</motion.button>
+          {cartButton('min-w-0 flex-1')}
+          <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={onBuyNow} disabled={sold || isAdding} className="btn-primary h-12 min-w-0 flex-1 whitespace-nowrap rounded-full px-4 text-sm font-bold shadow-[0_12px_26px_-12px_rgba(22,163,74,0.85)]">Buy Now</motion.button>
         </div>
       </motion.div>
     </div>

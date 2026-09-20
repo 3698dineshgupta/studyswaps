@@ -103,9 +103,9 @@ export default function CartPage() {
                         </motion.button>
                       </div>
 
-                      <div className="mt-auto flex items-end justify-between pt-3">
+                      <div className="mt-auto flex flex-wrap items-end justify-between gap-x-3 gap-y-2 pt-3">
                         <QuantityStepper quantity={item.quantity} />
-                        <Price value={p.price * item.quantity} original={p.original_price ? p.original_price * item.quantity : null} size="md" />
+                        <Price className="ml-auto text-right" value={p.price * item.quantity} original={p.original_price ? p.original_price * item.quantity : null} size="md" />
                       </div>
                     </div>
                   </motion.li>

@@ -44,7 +44,7 @@ function FeeNotice({ price }: { price: number }) {
       </dl>
       <ul className="list-disc space-y-1 pl-5 text-xs leading-relaxed text-green-900/90">
         <li>The fee is deducted only when your item is sold. Listing is free.</li>
-        <li>Your earnings are held safely once the buyer pays, and become <b>withdrawable</b> when the buyer confirms receipt — or automatically {WITHDRAWAL.releaseDays} days after delivery if they don&apos;t respond (unless a return is requested).</li>
+        <li>Your earnings are held safely once the buyer pays, and become <b>withdrawable</b> as soon as the order is delivered.</li>
         <li>Withdraw to <b>eSewa</b> from your dashboard: minimum {formatPrice(WITHDRAWAL.minAmount)}, up to {formatPrice(WITHDRAWAL.maxAmount)} per request, one request at a time, paid {WITHDRAWAL.processingText}. You must be a verified student.</li>
       </ul>
     </div>

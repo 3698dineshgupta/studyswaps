@@ -106,9 +106,9 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       });
     }
 
-    // Money: buyer confirming receipt releases the seller's held earnings straight away
+    // Money: once the order is delivered (or the buyer confirms), the seller's held earnings become withdrawable
     let released: number | undefined;
-    if (newStatus === 'BUYER_CONFIRMED') {
+    if (newStatus === 'DELIVERED' || newStatus === 'BUYER_CONFIRMED') {
       const r = await releaseOrderFunds(admin, params.id);
       if (r.released) released = r.amount;
       else if (r.reason === 'rpc_failed') {
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     // Tell the other party what happened
     const other = isBuyer ? order.seller_id : order.buyer_id;
     const link = isBuyer ? '/dashboard/orders' : `/orders/${params.id}`;
-    const extra = newStatus === 'DELIVERED' ? ` Please confirm receipt — if you don't, the seller is paid automatically after ${WITHDRAWAL.releaseDays} days.` : '';
+    const extra = newStatus === 'DELIVERED' ? ` Please confirm that you received it.` : '';
     await notify(other, {
       type: newStatus === 'DELIVERED' || newStatus === 'OUT_FOR_DELIVERY' ? 'DELIVERY_UPDATE' : 'ORDER_UPDATE',
       title: `Order ${order.order_number}: ${(DESCRIPTIONS[newStatus] ?? newStatus).replace(/^(Seller|Buyer|Order) (has |is )?/i, '')}`,

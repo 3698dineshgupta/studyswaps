@@ -44,7 +44,7 @@ const SECTIONS: { id: string; title: string; Icon: typeof FileText; body: ReactN
         <UL items={[
           <>The buyer pays through eSewa. The money is held by {APP_NAME}, not handed to the seller straight away.</>,
           <>The seller hands the item to {APP_NAME} (or our delivery partner). We check it, then deliver it to the buyer&apos;s address.</>,
-          <>When the buyer confirms receipt — or after {WITHDRAWAL.releaseDays} days without a problem being reported — the seller&apos;s earnings become withdrawable.</>,
+          <>As soon as {APP_NAME} marks the order delivered, the seller&apos;s earnings become withdrawable.</>,
         ]} />
       </>
     ),
@@ -182,8 +182,8 @@ const SECTIONS: { id: string; title: string; Icon: typeof FileText; body: ReactN
         ]} />
         <H>When you can withdraw</H>
         <UL items={[
-          <>After a sale your earnings first sit as <B>pending</B>. They become <B>available</B> when the buyer confirms delivery, or <B>{WITHDRAWAL.releaseDays} days after the order is marked delivered</B> if the buyer has not reported a problem — whichever comes first.</>,
-          'If the buyer reports a problem, the earnings for that order stay on hold until we have reviewed it.',
+          <>After a sale your earnings first sit as <B>pending</B>. They become <B>available</B> as soon as the order is marked <B>delivered</B>.</>,
+          'If a delivery problem is reported before the order is marked delivered, the earnings for that order stay on hold until we have reviewed it.',
         ]} />
         <H>Withdrawal requirements</H>
         <UL items={[
@@ -204,7 +204,7 @@ const SECTIONS: { id: string; title: string; Icon: typeof FileText; body: ReactN
       <>
         <UL items={[
           <><B>Before the item is collected</B> from the seller, you can ask to cancel. If we can stop the order, you are refunded to eSewa and the item goes back on sale.</>,
-          <><B>Not as described, damaged or wrong item?</B> Report it from your order page or through support <B>before you confirm receipt</B> — and within {WITHDRAWAL.releaseDays} days of delivery — with clear photos. We review each case with both sides (through us, never directly).</>,
+          <><B>Not as described, damaged or wrong item?</B> Report it from your order page or through support <B>as soon as you receive the item</B> — with clear photos. We review each case with both sides (through us, never directly).</>,
           'If we find the item was not as described, you get a refund of the item price to eSewa (and the delivery fee where the mistake was the seller\'s), and the seller\'s earnings for that order are cancelled.',
           'Change of mind, or a wrong choice made by the buyer, is not a reason for a refund once the item has been collected. Delivery and platform fees are not refunded for those cases.',
           'Refunds are issued to the same eSewa account used to pay, usually within a few working days after a decision.',

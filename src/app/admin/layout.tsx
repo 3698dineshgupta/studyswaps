@@ -29,27 +29,27 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/admin" className="flex items-center gap-2.5">
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-2 px-4">
+          <Link href="/admin" className="flex min-w-0 items-center gap-2.5">
             <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
               <GraduationCap className="w-4 h-4 text-white" />
             </div>
             <div>
               <span className="font-bold text-gray-900 text-sm">StudentMarket</span>
-              <span className="text-xs text-gray-400 ml-2">Admin</span>
+              <span className="ml-2 text-xs text-gray-400">Admin</span>
             </div>
           </Link>
-          <div className="flex items-center gap-2">
-            <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">{adminRole.role}</span>
-            <Link href="/" className="text-sm text-gray-500 hover:text-gray-700">← Site</Link>
+          <div className="flex shrink-0 items-center gap-2">
+            <span className="hidden max-w-[9rem] truncate rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 sm:inline">{adminRole.role}</span>
+            <Link href="/" className="whitespace-nowrap text-sm font-medium text-gray-500 hover:text-gray-700">← Site</Link>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="flex gap-6">
+      <div className="mx-auto max-w-7xl px-4 pb-10 lg:py-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
           <AdminNav />
-          <main className="flex-1 min-w-0">{children}</main>
+          <main className="min-w-0 flex-1 pt-2 lg:pt-0">{children}</main>
         </div>
       </div>
     </div>

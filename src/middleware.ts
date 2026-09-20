@@ -130,11 +130,16 @@ export async function middleware(request: NextRequest) {
         },
         set(name: string, value: string, options: CookieOptions) {
           request.cookies.set({ name, value, ...options })
+          // Forward the REFRESHED session to pages and API routes in this same request. Without this they still saw the
+          // old (expired) cookie, tried to refresh it again with a refresh token that was already used, and failed —
+          // logging people out / "Not found" on admin actions / "Log in to add to cart" about an hour after sign-in.
+          requestHeaders.set('cookie', request.cookies.toString())
           response = NextResponse.next({ request: { headers: requestHeaders } })
           response.cookies.set({ name, value, ...options, ...cookieDefaults })
         },
         remove(name: string, options: CookieOptions) {
           request.cookies.set({ name, value: '', ...options })
+          requestHeaders.set('cookie', request.cookies.toString())
           response = NextResponse.next({ request: { headers: requestHeaders } })
           response.cookies.set({ name, value: '', ...options, ...cookieDefaults })
         },

@@ -176,9 +176,9 @@ export default function CheckoutPage() {
                       <Link href="/policies#delivery" target="_blank" className="font-medium text-green-700 underline-offset-2 hover:underline">Delivery</Link> and{' '}
                       <Link href="/policies#refunds" target="_blank" className="font-medium text-green-700 underline-offset-2 hover:underline">Refund policy</Link>.
                     </p>
-                    <div className="flex gap-3">
-                      <Button variant="outline" onClick={() => setStep(2)} className="flex-1">Back</Button>
-                      <Button onClick={handlePlaceOrder} loading={loading} className="flex-1" size="lg">Pay {formatPrice(grandTotal)} with eSewa</Button>
+                    <div className="flex flex-col-reverse gap-3 sm:flex-row">
+                      <Button variant="outline" onClick={() => setStep(2)} className="sm:flex-1">Back</Button>
+                      <Button onClick={handlePlaceOrder} loading={loading} className="w-full whitespace-nowrap sm:flex-[2]" size="lg">Pay {formatPrice(grandTotal)} with eSewa</Button>
                     </div>
                   </>
                 )}

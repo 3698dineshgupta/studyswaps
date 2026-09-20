@@ -30,7 +30,7 @@ const W_STATUS: Record<string, string> = { REQUESTED: 'bg-amber-100 text-amber-8
 const STEPS = [
   { Icon: Wallet, title: 'Buyer pays', text: `You earn the item price minus the ${SELLER_COMMISSION_RATE * 100}% StudentMarket fee. It's held safely as “Held”.` },
   { Icon: Hourglass, title: 'We deliver', text: 'We collect from you and deliver to the buyer. Delivery and the buyer’s platform fee are never taken from you.' },
-  { Icon: BadgeCheck, title: 'Buyer confirms', text: `Your earnings become “Available” when the buyer confirms receipt — or automatically ${WITHDRAWAL.releaseDays} days after delivery if they don't respond (unless a return is requested).` },
+  { Icon: BadgeCheck, title: 'Delivered', text: 'The moment we mark the order delivered, your earnings become “Available” to withdraw.' },
   { Icon: ArrowDownToLine, title: 'You withdraw', text: `Send Available earnings to your eSewa. Paid ${WITHDRAWAL.processingText}.` },
 ];
 
@@ -169,7 +169,7 @@ export default function DashboardWalletPage() {
                 <div className="min-w-0">
                   <p className="truncate font-medium text-ink">{h.title} <span className="font-mono text-xs text-ink-muted">#{h.orderNumber}</span></p>
                   <p className="text-xs text-ink-muted">
-                    {h.stage === 'awaiting_delivery' ? 'Waiting for delivery' : h.releaseOn ? `Withdrawable when the buyer confirms, or automatically on ${formatDate(h.releaseOn)}` : 'Waiting for the buyer to confirm'}
+                    {h.stage === 'awaiting_delivery' ? 'Waiting for delivery' : 'Withdrawable as soon as it is delivered'}
                   </p>
                 </div>
                 <div className="text-right text-sm"><p className="font-display font-bold text-ink">{formatPrice(h.net)}</p><p className="text-xs text-ink-muted">{formatPrice(h.gross)} − {formatPrice(h.commission)} fee</p></div>

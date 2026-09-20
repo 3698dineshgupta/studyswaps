@@ -60,9 +60,9 @@ export function PageTitle({ title, hint, right }: { title: string; hint?: string
 
 export function TabBar({ tabs, value, onChange }: { tabs: { id: string; label: string; count?: number }[]; value: string; onChange: (id: string) => void }) {
   return (
-    <div className="mb-4 flex flex-wrap gap-2" role="tablist">
+    <div className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0" role="tablist">
       {tabs.map((t) => (
-        <button key={t.id} role="tab" aria-selected={value === t.id} onClick={() => onChange(t.id)} className={cn('flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors', value === t.id ? 'border-green-600 bg-green-600 text-white' : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300')}>
+        <button key={t.id} role="tab" aria-selected={value === t.id} onClick={() => onChange(t.id)} className={cn('flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-colors', value === t.id ? 'border-green-600 bg-green-600 text-white' : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300')}>
           {t.label}
           {t.count !== undefined && <span className={cn('rounded-full px-1.5 text-xs', value === t.id ? 'bg-white/25 text-white' : t.count > 0 ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-500')}>{t.count}</span>}
         </button>
