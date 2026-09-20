@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createServerClient();
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const user = await getFastUser(supabase); const authError = null; // cart is not money: RLS enforces ownership, so no network round trip (a flaky one logged people out)
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -179,7 +179,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const supabase = await createServerClient();
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const user = await getFastUser(supabase); const authError = null; // cart is not money: RLS enforces ownership, so no network round trip (a flaky one logged people out)
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -228,7 +228,7 @@ export async function DELETE(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const supabase = await createServerClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const user = await getFastUser(supabase); const authError = null; // cart is not money: RLS enforces ownership, so no network round trip (a flaky one logged people out)
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     

@@ -26,7 +26,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { Reveal } from '@/components/ui/Reveal';
 import { getSupabase } from '@/lib/supabase/lazy';
 import { DELIVERY, PLATFORM_FEE } from '@/lib/pricing';
-import { PRODUCT_CONDITIONS } from '@/lib/constants';
+import { PRODUCT_CONDITIONS, supportWhatsAppUrl } from '@/lib/constants';
 import { DURATION, EASE, SPRING, fadeUp, stagger } from '@/lib/motion';
 import { cn, formatDate, formatPrice, formatRelativeTime } from '@/lib/utils';
 
@@ -250,7 +250,7 @@ function ProductView({ product, id }: { product: any; id: string }) {
                 </div>
               </div>
             </div>
-            <Link href={`/chat?seller=${product.seller_id}&product=${product.id}`} className="btn-secondary mt-4 w-full justify-center px-4 py-2.5 text-sm"><MessageCircle className="h-4 w-4" /> Contact seller</Link>
+            <a href={supportWhatsAppUrl(`Hi StudentMarket support, I have a question about "${product.title}" (ID: ${product.id})`)} target="_blank" rel="noopener noreferrer" className="btn-secondary mt-4 w-full justify-center px-4 py-2.5 text-sm"><MessageCircle className="h-4 w-4" /> Contact support</a>
           </motion.section>
 
           {/* Location */}

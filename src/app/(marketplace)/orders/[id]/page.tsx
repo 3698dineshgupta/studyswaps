@@ -16,7 +16,7 @@ import SellerBadge from '@/components/shared/SellerBadge';
 import LocationBadge from '@/components/ui/LocationBadge';
 import { Reveal, RevealGroup, RevealItem } from '@/components/ui/Reveal';
 import { startEsewaPayment } from '@/lib/esewa/client';
-import { PRODUCT_CONDITIONS, ORDER_STATUS_LABELS } from '@/lib/constants';
+import { PRODUCT_CONDITIONS, ORDER_STATUS_LABELS, supportWhatsAppUrl } from '@/lib/constants';
 import { cn, formatDate, formatPrice, getSupabaseImageUrl, isCloudinaryUrl } from '@/lib/utils';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -254,9 +254,9 @@ export default function OrderDetailPage() {
               <h2 className="mb-3 font-display text-lg font-bold text-ink">Seller</h2>
               <SellerBadge name={order.seller?.full_name} photo={order.seller?.profile_photo} verified={order.seller?.verification_status === 'VERIFIED'} rating={order.seller?.seller_rating} reviews={order.seller?.seller_review_count} size="md" />
               <LocationBadge location={order.seller?.location} className="mt-2" />
-              <Link href={`/chat?seller=${order.seller_id}&order=${order.id}`} className="btn-secondary mt-4 flex w-full text-sm">
-                <MessageCircle className="h-4 w-4" /> Contact seller
-              </Link>
+              <a href={supportWhatsAppUrl(`Hi StudentMarket support, I need help with order #${order.order_number}`)} target="_blank" rel="noopener noreferrer" className="btn-secondary mt-4 flex w-full text-sm">
+                <MessageCircle className="h-4 w-4" /> Contact support
+              </a>
             </section>
           </RevealItem>
 

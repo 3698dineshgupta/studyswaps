@@ -108,3 +108,8 @@ export const CONDITION_CONFIG: Record<string, { label: string; color: string }> 
   PRODUCT_CONDITIONS.map((c) => [c.value, { label: c.label, color: c.color }])
 )
 
+
+/** Customer support on WhatsApp (buyers and sellers never chat directly — support is the single point of contact). */
+export const SUPPORT_WHATSAPP = '9779812969636'
+export const SUPPORT_PHONE_DISPLAY = '+977 981-2969636'
+export const supportWhatsAppUrl = (message?: string) => `https://wa.me/${SUPPORT_WHATSAPP}${message ? `?text=${encodeURIComponent(message)}` : ''}`
