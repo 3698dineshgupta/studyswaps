@@ -1,0 +1,212 @@
+{
+  "label": "baseline",
+  "base": "http://localhost:3200",
+  "pages": {
+    "desktop · home (guest)": {
+      "ttfb": 58,
+      "fcp": 736,
+      "lcp": 1000,
+      "cls": 0.002,
+      "load": 960,
+      "reqs": 65,
+      "totalKB": 1456,
+      "jsKB": 961,
+      "imgKB": 117,
+      "fontKB": 74,
+      "cssKB": 104,
+      "apiKB": 0.1,
+      "wall": 2379
+    },
+    "desktop · browse (guest)": {
+      "ttfb": 55,
+      "fcp": 504,
+      "lcp": 1460,
+      "cls": 0.002,
+      "load": 740,
+      "reqs": 79,
+      "totalKB": 1380,
+      "jsKB": 983,
+      "imgKB": 144,
+      "fontKB": 74,
+      "cssKB": 104,
+      "apiKB": 13.8,
+      "wall": 2371
+    },
+    "desktop · product page (guest)": {
+      "ttfb": 54,
+      "fcp": 520,
+      "lcp": 1008,
+      "cls": 0.002,
+      "load": 803,
+      "reqs": 67,
+      "totalKB": 1383,
+      "jsKB": 1000,
+      "imgKB": 146,
+      "fontKB": 74,
+      "cssKB": 104,
+      "apiKB": 2.8,
+      "wall": 2688
+    },
+    "desktop · login": {
+      "ttfb": 40,
+      "fcp": 492,
+      "lcp": 612,
+      "cls": 0,
+      "load": 742,
+      "reqs": 39,
+      "totalKB": 1197,
+      "jsKB": 980,
+      "imgKB": 0,
+      "fontKB": 74,
+      "cssKB": 104,
+      "apiKB": 0.1,
+      "wall": 2283
+    },
+    "desktop · home (signed in)": {
+      "ttfb": 767,
+      "fcp": 1432,
+      "lcp": 1876,
+      "cls": 0.001,
+      "load": 1663,
+      "reqs": 64,
+      "totalKB": 1504,
+      "jsKB": 961,
+      "imgKB": 117,
+      "fontKB": 74,
+      "cssKB": 104,
+      "apiKB": 1.1,
+      "wall": 4026
+    },
+    "desktop · cart (signed in)": {
+      "ttfb": 676,
+      "fcp": 1164,
+      "lcp": 2528,
+      "cls": 0.001,
+      "load": 1392,
+      "reqs": 56,
+      "totalKB": 1226,
+      "jsKB": 988,
+      "imgKB": 5,
+      "fontKB": 74,
+      "cssKB": 104,
+      "apiKB": 1.1,
+      "wall": 3813
+    },
+    "mobile · home (guest)": {
+      "ttfb": 29,
+      "fcp": 1812,
+      "lcp": 1812,
+      "cls": 0.022,
+      "load": 3034,
+      "reqs": 39,
+      "totalKB": 1384,
+      "jsKB": 961,
+      "imgKB": 55,
+      "fontKB": 74,
+      "cssKB": 104,
+      "apiKB": 0.1,
+      "wall": 4418
+    },
+    "mobile · browse (guest)": {
+      "ttfb": 54,
+      "fcp": 1364,
+      "lcp": 1364,
+      "cls": 0.027,
+      "load": 2741,
+      "reqs": 37,
+      "totalKB": 1173,
+      "jsKB": 929,
+      "imgKB": 0,
+      "fontKB": 74,
+      "cssKB": 104,
+      "apiKB": 0.1,
+      "wall": 4209
+    },
+    "mobile · product page (guest)": {
+      "ttfb": 73,
+      "fcp": 0,
+      "lcp": 0,
+      "cls": 0,
+      "load": 2871,
+      "reqs": 30,
+      "totalKB": 1096,
+      "jsKB": 946,
+      "imgKB": 0,
+      "fontKB": 0,
+      "cssKB": 104,
+      "apiKB": 0.1,
+      "wall": 4754
+    },
+    "mobile · login": {
+      "ttfb": 52,
+      "fcp": 1332,
+      "lcp": 1992,
+      "cls": 0,
+      "load": 2694,
+      "reqs": 28,
+      "totalKB": 1084,
+      "jsKB": 865,
+      "imgKB": 0,
+      "fontKB": 74,
+      "cssKB": 104,
+      "apiKB": 0.1,
+      "wall": 4423
+    },
+    "mobile · home (signed in)": {
+      "ttfb": 809,
+      "fcp": 2492,
+      "lcp": 2492,
+      "cls": 0.022,
+      "load": 3869,
+      "reqs": 38,
+      "totalKB": 1381,
+      "jsKB": 961,
+      "imgKB": 55,
+      "fontKB": 74,
+      "cssKB": 104,
+      "apiKB": 0,
+      "wall": 5986
+    },
+    "mobile · cart (signed in)": {
+      "ttfb": 692,
+      "fcp": 1840,
+      "lcp": 1852,
+      "cls": 0,
+      "load": 3231,
+      "reqs": 47,
+      "totalKB": 1243,
+      "jsKB": 988,
+      "imgKB": 0,
+      "fontKB": 74,
+      "cssKB": 104,
+      "apiKB": 1.1,
+      "wall": 6449
+    }
+  },
+  "api": {
+    "GET /api/products (list)": {
+      "medianMs": 331,
+      "kb": 13.7
+    },
+    "GET /api/products?q=": {
+      "medianMs": 332,
+      "kb": 1.8
+    },
+    "GET /api/products/:id": {
+      "medianMs": 333,
+      "kb": 1.8
+    },
+    "GET /api/cart (guest)": {
+      "medianMs": 8,
+      "kb": 0.1
+    },
+    "GET /api/cart (signed in)": {
+      "medianMs": 1209,
+      "kb": 1.1
+    },
+    "GET /api/orders (signed in)": {
+      "medianMs": 944,
+      "kb": 8.4
+    }
+  }
+}

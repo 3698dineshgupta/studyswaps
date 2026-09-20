@@ -1,0 +1,212 @@
+{
+  "label": "final",
+  "base": "http://localhost:3200",
+  "pages": {
+    "desktop · home (guest)": {
+      "ttfb": 43,
+      "fcp": 712,
+      "lcp": 712,
+      "cls": 0,
+      "load": 703,
+      "reqs": 65,
+      "totalKB": 1210,
+      "jsKB": 717,
+      "imgKB": 117,
+      "fontKB": 74,
+      "cssKB": 97,
+      "apiKB": 0.1,
+      "wall": 2392
+    },
+    "desktop · browse (guest)": {
+      "ttfb": 60,
+      "fcp": 280,
+      "lcp": 1084,
+      "cls": 0,
+      "load": 962,
+      "reqs": 78,
+      "totalKB": 1201,
+      "jsKB": 740,
+      "imgKB": 144,
+      "fontKB": 74,
+      "cssKB": 97,
+      "apiKB": 0.1,
+      "wall": 3234
+    },
+    "desktop · product page (guest)": {
+      "ttfb": 379,
+      "fcp": 628,
+      "lcp": 836,
+      "cls": 0.001,
+      "load": 632,
+      "reqs": 69,
+      "totalKB": 1396,
+      "jsKB": 1010,
+      "imgKB": 146,
+      "fontKB": 74,
+      "cssKB": 97,
+      "apiKB": 1,
+      "wall": 3213
+    },
+    "desktop · login": {
+      "ttfb": 49,
+      "fcp": 256,
+      "lcp": 948,
+      "cls": 0.003,
+      "load": 267,
+      "reqs": 39,
+      "totalKB": 945,
+      "jsKB": 736,
+      "imgKB": 0,
+      "fontKB": 74,
+      "cssKB": 97,
+      "apiKB": 0.1,
+      "wall": 2044
+    },
+    "desktop · home (signed in)": {
+      "ttfb": 61,
+      "fcp": 672,
+      "lcp": 828,
+      "cls": 0,
+      "load": 656,
+      "reqs": 66,
+      "totalKB": 1446,
+      "jsKB": 971,
+      "imgKB": 117,
+      "fontKB": 74,
+      "cssKB": 97,
+      "apiKB": 1.1,
+      "wall": 2493
+    },
+    "desktop · cart (signed in)": {
+      "ttfb": 58,
+      "fcp": 280,
+      "lcp": 840,
+      "cls": 0,
+      "load": 285,
+      "reqs": 58,
+      "totalKB": 1226,
+      "jsKB": 997,
+      "imgKB": 5,
+      "fontKB": 74,
+      "cssKB": 97,
+      "apiKB": 1.1,
+      "wall": 2397
+    },
+    "mobile · home (guest)": {
+      "ttfb": 58,
+      "fcp": 1492,
+      "lcp": 2440,
+      "cls": 0,
+      "load": 2788,
+      "reqs": 52,
+      "totalKB": 1195,
+      "jsKB": 717,
+      "imgKB": 55,
+      "fontKB": 74,
+      "cssKB": 97,
+      "apiKB": 0.1,
+      "wall": 5749
+    },
+    "mobile · browse (guest)": {
+      "ttfb": 39,
+      "fcp": 1020,
+      "lcp": 1308,
+      "cls": 0,
+      "load": 2891,
+      "reqs": 63,
+      "totalKB": 1230,
+      "jsKB": 740,
+      "imgKB": 107,
+      "fontKB": 74,
+      "cssKB": 97,
+      "apiKB": 0.1,
+      "wall": 5951
+    },
+    "mobile · product page (guest)": {
+      "ttfb": 377,
+      "fcp": 1404,
+      "lcp": 2172,
+      "cls": 0,
+      "load": 2757,
+      "reqs": 46,
+      "totalKB": 1299,
+      "jsKB": 967,
+      "imgKB": 87,
+      "fontKB": 74,
+      "cssKB": 97,
+      "apiKB": 1,
+      "wall": 7006
+    },
+    "mobile · login": {
+      "ttfb": 42,
+      "fcp": 948,
+      "lcp": 2840,
+      "cls": 0,
+      "load": 2110,
+      "reqs": 39,
+      "totalKB": 977,
+      "jsKB": 736,
+      "imgKB": 0,
+      "fontKB": 74,
+      "cssKB": 97,
+      "apiKB": 0.1,
+      "wall": 4569
+    },
+    "mobile · home (signed in)": {
+      "ttfb": 55,
+      "fcp": 1616,
+      "lcp": 2520,
+      "cls": 0,
+      "load": 3117,
+      "reqs": 49,
+      "totalKB": 1384,
+      "jsKB": 971,
+      "imgKB": 55,
+      "fontKB": 74,
+      "cssKB": 97,
+      "apiKB": 1.1,
+      "wall": 5157
+    },
+    "mobile · cart (signed in)": {
+      "ttfb": 55,
+      "fcp": 948,
+      "lcp": 2916,
+      "cls": 0,
+      "load": 2185,
+      "reqs": 52,
+      "totalKB": 1272,
+      "jsKB": 997,
+      "imgKB": 5,
+      "fontKB": 74,
+      "cssKB": 97,
+      "apiKB": 1.1,
+      "wall": 4914
+    }
+  },
+  "api": {
+    "GET /api/products (list)": {
+      "medianMs": 340,
+      "kb": 13.5
+    },
+    "GET /api/products?q=": {
+      "medianMs": 328,
+      "kb": 1.7
+    },
+    "GET /api/products/:id": {
+      "medianMs": 330,
+      "kb": 1.8
+    },
+    "GET /api/cart (guest)": {
+      "medianMs": 7,
+      "kb": 0.1
+    },
+    "GET /api/cart (signed in)": {
+      "medianMs": 324,
+      "kb": 1.1
+    },
+    "GET /api/orders (signed in)": {
+      "medianMs": 339,
+      "kb": 8.4
+    }
+  }
+}
