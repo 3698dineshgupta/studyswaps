@@ -1,5 +1,5 @@
 /**
- * StudentMarket security regression suite (safe: uses throwaway users + products it creates, then deletes them).
+ * StudySwaps security regression suite (safe: uses throwaway users + products it creates, then deletes them).
  *
  *   node scripts/security/regression.mjs [baseUrl]      (default http://localhost:3000; the server must be running)
  *

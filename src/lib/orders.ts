@@ -25,7 +25,7 @@ export const COMPLETED_STATUSES = ['COMPLETED', 'BUYER_CONFIRMED', 'CANCELLED', 
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
- * `viewer` decides what the caller may see. StudentMarket is the mediator: the buyer's phone, address and landmark
+ * `viewer` decides what the caller may see. StudySwaps is the mediator: the buyer's phone, address and landmark
  * are NEVER sent to the seller, and the seller's contact details are never sent to the buyer.
  */
 export function shapeOrder(order: any, viewer: 'buyer' | 'seller' = 'buyer') {

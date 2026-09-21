@@ -220,7 +220,7 @@ export default function OrderDetailPage() {
                 {isHome && order.delivery_address?.distance_km != null && <InfoRow label="Distance">{order.delivery_address.distance_km} km from the seller</InfoRow>}
                 <InfoRow label="Delivery fee">{formatPrice(order.delivery_fee)}</InfoRow>
               </dl>
-              <p className="mt-3 rounded-xl bg-green-50 p-3 text-xs leading-relaxed text-green-800">StudentMarket collects the item from the seller and brings it to you — you two never need to meet.</p>
+              <p className="mt-3 rounded-xl bg-green-50 p-3 text-xs leading-relaxed text-green-800">StudySwaps collects the item from the seller and brings it to you — you two never need to meet.</p>
             </section>
           </RevealItem>
         </div>
@@ -254,7 +254,7 @@ export default function OrderDetailPage() {
               <h2 className="mb-3 font-display text-lg font-bold text-ink">Seller</h2>
               <SellerBadge name={order.seller?.full_name} photo={order.seller?.profile_photo} verified={order.seller?.verification_status === 'VERIFIED'} rating={order.seller?.seller_rating} reviews={order.seller?.seller_review_count} size="md" />
               <LocationBadge location={order.seller?.location} className="mt-2" />
-              <a href={supportWhatsAppUrl(`Hi StudentMarket support, I need help with order #${order.order_number}`)} target="_blank" rel="noopener noreferrer" className="btn-secondary mt-4 flex w-full text-sm">
+              <a href={supportWhatsAppUrl(`Hi StudySwaps support, I need help with order #${order.order_number}`)} target="_blank" rel="noopener noreferrer" className="btn-secondary mt-4 flex w-full text-sm">
                 <MessageCircle className="h-4 w-4" /> Contact support
               </a>
             </section>

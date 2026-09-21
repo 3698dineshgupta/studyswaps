@@ -1,4 +1,4 @@
-# StudentMarket — Security audit, fixes and runbook
+# StudySwaps — Security audit, fixes and runbook
 
 Posture: **improved, not "unhackable"**. Nothing here is a guarantee; the remaining risks are listed at the end.
 

@@ -23,7 +23,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div>
-      <PageTitle title="Dashboard" hint="What needs you right now, and how StudentMarket is doing." />
+      <PageTitle title="Dashboard" hint="What needs you right now, and how StudySwaps is doing." />
 
       <section aria-label="Needs attention" className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {todo.map(({ label, n, href, Icon }) => (
@@ -45,7 +45,7 @@ export default function AdminDashboardPage() {
           <div key={label} className="rounded-2xl border border-gray-200 bg-white p-4"><Icon className="mb-2 h-5 w-5 text-green-600" /><p className="font-display text-xl font-extrabold text-gray-900">{v}</p><p className="text-xs text-gray-500">{label}</p></div>
         ))}
         <div className="col-span-2 rounded-2xl bg-ink p-4 text-white lg:col-span-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">StudentMarket earned (30 days)</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">StudySwaps earned (30 days)</p>
           <p className="font-display text-3xl font-extrabold text-green-400">{formatPrice(t.platformShare30d)}</p>
           <p className="text-xs text-gray-400">Delivery fees + platform fees + 5% seller commission on paid orders.</p>
         </div>

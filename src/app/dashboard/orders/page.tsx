@@ -13,13 +13,13 @@ import { cn, formatPrice, formatRelativeTime } from '@/lib/utils';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-// What the seller can do next at each stage (StudentMarket collects the item and delivers it)
+// What the seller can do next at each stage (StudySwaps collects the item and delivers it)
 const NEXT: Record<string, { status: string; label: string }> = {
   PAYMENT_CONFIRMED: { status: 'SELLER_ACCEPTED', label: 'Accept order' },
   SELLER_NOTIFIED: { status: 'SELLER_ACCEPTED', label: 'Accept order' },
   SELLER_ACCEPTED: { status: 'PACKING', label: 'Start packing' },
   PACKING: { status: 'READY_FOR_PICKUP', label: 'Ready for collection' },
-  READY_FOR_PICKUP: { status: 'PICKED_UP', label: 'Handed to StudentMarket' },
+  READY_FOR_PICKUP: { status: 'PICKED_UP', label: 'Handed to StudySwaps' },
   PICKED_UP: { status: 'IN_TRANSIT', label: 'Mark in transit' },
   IN_TRANSIT: { status: 'OUT_FOR_DELIVERY', label: 'Out for delivery' },
   OUT_FOR_DELIVERY: { status: 'DELIVERED', label: 'Mark delivered' },
@@ -68,7 +68,7 @@ export default function DashboardOrdersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-3xl font-extrabold tracking-tight text-ink">Orders</h1>
-        <p className="mt-1 text-sm text-ink-muted">Hand items to StudentMarket — we deliver them. You never need to meet the buyer.</p>
+        <p className="mt-1 text-sm text-ink-muted">Hand items to StudySwaps — we deliver them. You never need to meet the buyer.</p>
       </div>
 
       {isLoading ? (

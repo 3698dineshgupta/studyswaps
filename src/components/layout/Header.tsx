@@ -5,7 +5,7 @@ import { Suspense, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'motion/react'
 import {
-  Bell, Search, BookOpen, ChevronDown, LogOut, Heart,
+  Bell, Search, ChevronDown, LogOut, Heart,
   Package, LayoutDashboard, Shield, ShieldCheck, User, Plus, X,
 } from 'lucide-react'
 import { getSupabase } from '@/lib/supabase/lazy'
@@ -17,6 +17,7 @@ import { useAuthState } from '@/components/auth/AuthProvider'
 import CartIconLink from '@/components/cart/CartIconLink'
 import { CityPicker } from '@/components/city/CityProvider'
 import { popover, SPRING } from '@/lib/motion'
+import { BrandMark, Wordmark } from '@/components/brand/Logo'
 import { cn } from '@/lib/utils'
 
 
@@ -118,13 +119,11 @@ export function Header() {
       <div className="page-container">
         <div className="flex h-16 items-center gap-3 lg:h-[68px]">
           {/* Logo */}
-          <Link href="/" className="flex shrink-0 items-center gap-2.5" aria-label="StudentMarket home">
-            <motion.span whileHover={{ rotate: -8, scale: 1.05 }} transition={SPRING.bouncy} className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-600 shadow-[0_6px_16px_-6px_rgba(22,163,74,0.7)]">
-              <BookOpen className="h-5 w-5 text-white" />
+          <Link href="/" className="flex shrink-0 items-center gap-2.5" aria-label="StudySwaps home">
+            <motion.span whileHover={{ rotate: -6, scale: 1.06 }} transition={SPRING.bouncy} className="flex">
+              <BrandMark priority className="h-9 lg:h-10" />
             </motion.span>
-            <span className="hidden font-display text-lg font-bold tracking-tight text-ink sm:block">
-              Student<span className="text-green-600">Market</span>
-            </span>
+            <Wordmark className="hidden text-xl sm:block" />
           </Link>
 
           <CityPicker />

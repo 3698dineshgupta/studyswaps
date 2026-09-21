@@ -1,5 +1,5 @@
 /**
- * StudentMarket motion vocabulary — the ONLY place animation timings live.
+ * StudySwaps motion vocabulary — the ONLY place animation timings live.
  * Every page and component imports from here so the whole product moves the same way.
  *
  *   fast   150ms  hover / press feedback, small UI (icons, chips)

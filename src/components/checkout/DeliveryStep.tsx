@@ -22,11 +22,11 @@ interface DeliveryStepProps {
   quote: QuoteState;
 }
 
-/** Seller → StudentMarket → You, with a parcel travelling along the route. */
+/** Seller → StudySwaps → You, with a parcel travelling along the route. */
 function MediatorFlow() {
   const nodes = [
     { icon: Store, label: 'Seller', sub: 'hands it to us' },
-    { icon: ShieldCheck, label: 'StudentMarket', sub: 'checks & holds it' },
+    { icon: ShieldCheck, label: 'StudySwaps', sub: 'checks & holds it' },
     { icon: Home, label: 'You', sub: 'at your door' },
   ];
   return (

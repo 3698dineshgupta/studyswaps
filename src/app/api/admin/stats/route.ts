@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       count('orders', (q) => (q as any).gte('created_at', new Date(new Date().setHours(0, 0, 0, 0)).toISOString()).neq('status', 'CREATED')), // eslint-disable-line @typescript-eslint/no-explicit-any
     ]), paysP, recentP]);
 
-    // Money: confirmed payments in the last 30 days, and StudentMarket's share (platform fee + delivery + 5% commission)
+    // Money: confirmed payments in the last 30 days, and StudySwaps's share (platform fee + delivery + 5% commission)
     const gross = (pays ?? []).reduce((s, p) => s + Number(p.amount), 0);
     const ids = (pays ?? []).map((p) => p.order_id);
     let ours = 0;

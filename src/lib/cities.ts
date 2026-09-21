@@ -1,5 +1,5 @@
 /**
- * The cities StudentMarket has launched in. One list drives everything: who sees which listings,
+ * The cities StudySwaps has launched in. One list drives everything: who sees which listings,
  * where addresses can be searched, the sign-up city choice and the delivery area.
  */
 import { haversineKm } from '@/lib/pricing'

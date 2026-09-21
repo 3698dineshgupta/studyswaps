@@ -26,7 +26,7 @@ export async function GET(_req: NextRequest, { params }: { params: { z: string; 
 
   try {
     const res = await fetch(`https://tile.openstreetmap.org/${z}/${x}/${y}.png`, {
-      headers: { 'User-Agent': 'StudentMarket/1.0 (student marketplace, Nepal)' },
+      headers: { 'User-Agent': 'StudySwaps/1.0 (student marketplace, Nepal)' },
       signal: AbortSignal.timeout(10000),
       next: { revalidate: 86400 },
     });

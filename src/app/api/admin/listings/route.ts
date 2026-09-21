@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
 
     const link = `/product/${id}`;
     if (action === 'approve' || action === 'restore') {
-      await notify(product.seller_id, { type: 'LISTING_STATUS', title: 'Your listing is live 🎉', body: `"${product.title}" was approved and is now visible to buyers.`, actionUrl: link, email: { subject: 'Your listing is live on StudentMarket 🎉', cta: 'View your listing' } });
+      await notify(product.seller_id, { type: 'LISTING_STATUS', title: 'Your listing is live 🎉', body: `"${product.title}" was approved and is now visible to buyers.`, actionUrl: link, email: { subject: 'Your listing is live on StudySwaps 🎉', cta: 'View your listing' } });
     } else if (action === 'reject') {
       await notify(product.seller_id, { type: 'LISTING_STATUS', title: 'Listing not approved', body: `"${product.title}" wasn't approved: ${reason}. You can create a new listing with the fixes.`, actionUrl: '/dashboard/listings', email: { subject: 'Your listing was not approved', cta: 'Open my listings' } });
     } else if (action === 'suspend') {

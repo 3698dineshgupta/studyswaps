@@ -71,7 +71,7 @@ export default function SellerVerificationGate({ status, defaults }: Props) {
                 <div className="space-y-3 py-6 text-center">
                   <AlertTriangle className="mx-auto h-10 w-10 text-amber-500" />
                   <p className="font-display text-lg font-bold text-ink">Your account is suspended</p>
-                  <p className="text-sm text-ink-muted">You can&apos;t list items right now. Please contact StudentMarket support.</p>
+                  <p className="text-sm text-ink-muted">You can&apos;t list items right now. Please contact StudySwaps support.</p>
                   <Button onClick={leave} variant="outline">Back to marketplace</Button>
                 </div>
               ) : inReview ? (

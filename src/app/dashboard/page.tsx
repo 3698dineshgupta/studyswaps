@@ -10,7 +10,7 @@ import { ORDER_STATUS_LABELS } from '@/lib/constants';
 import { SELLER_COMMISSION_RATE, WITHDRAWAL } from '@/lib/pricing';
 import { formatPrice, formatRelativeTime } from '@/lib/utils';
 
-export const metadata: Metadata = { title: 'Seller dashboard — StudentMarket' };
+export const metadata: Metadata = { title: 'Seller dashboard — StudySwaps' };
 export const dynamic = 'force-dynamic';
 
 // NOTE: the layout already renders the site header, dashboard tabs and mobile nav.

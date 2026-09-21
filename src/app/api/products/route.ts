@@ -213,7 +213,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Tell the seller we have it (email + in-app); they'll hear again when a moderator decides
-    await notify(profile.id, { type: 'LISTING_STATUS', title: 'We received your listing', body: `"${data.title}" is waiting for approval. A moderator will review it soon — you'll get an email as soon as it goes live.`, actionUrl: '/dashboard/listings', email: { subject: 'We received your listing on StudentMarket', cta: 'View my listings' } });
+    await notify(profile.id, { type: 'LISTING_STATUS', title: 'We received your listing', body: `"${data.title}" is waiting for approval. A moderator will review it soon — you'll get an email as soon as it goes live.`, actionUrl: '/dashboard/listings', email: { subject: 'We received your listing on StudySwaps', cta: 'View my listings' } });
 
     // Alert moderators on Telegram; on failure queue a retry instead of failing the request
     try {

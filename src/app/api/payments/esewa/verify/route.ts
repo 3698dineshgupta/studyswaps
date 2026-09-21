@@ -186,7 +186,7 @@ Transaction: ${callback.transaction_code}`).catch(() => {});
     }
 
     // Hold the seller's NET earnings (item price minus the 5% commission) until delivery is confirmed.
-    // Delivery and platform fees belong to StudentMarket and are never credited to the seller.
+    // Delivery and platform fees belong to StudySwaps and are never credited to the seller.
     const subtotal = Number(order.subtotal);
     const commission = commissionFor(subtotal);
     const sellerNet = Math.round((subtotal - commission) * 100) / 100;
@@ -201,7 +201,7 @@ Transaction: ${callback.transaction_code}`).catch(() => {});
         .from('wallet_ledger')
         .update({
           reference: `Order ${order.order_number}`,
-          description: `Sale Rs. ${subtotal} − ${SELLER_COMMISSION_RATE * 100}% StudentMarket fee Rs. ${commission} = Rs. ${sellerNet} (held until delivery is confirmed)`,
+          description: `Sale Rs. ${subtotal} − ${SELLER_COMMISSION_RATE * 100}% StudySwaps fee Rs. ${commission} = Rs. ${sellerNet} (held until delivery is confirmed)`,
         })
         .eq('order_id', order.id)
         .eq('transaction_type', 'SALE_PENDING');

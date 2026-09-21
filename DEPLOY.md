@@ -1,4 +1,4 @@
-# Putting StudentMarket live (Vercel + Supabase)
+# Putting StudySwaps live (Vercel + Supabase)
 
 **How it fits together.** One Next.js app does both jobs. The pages (frontend) *and* the `/api/*` routes (backend)
 deploy together to **Vercel**. **Supabase** is your database, login and file storage (already live). Nothing else needs a server.
@@ -21,7 +21,7 @@ The folder is not a git repo yet. In the project folder:
 ```
 git init
 git add .
-git commit -m "StudentMarket"
+git commit -m "StudySwaps"
 ```
 Create an **empty private repository** on github.com, then run the two commands GitHub shows (`git remote add origin …`, `git push -u origin main`).
 `.gitignore` already keeps `.env*` (all your secrets) out of the repo. The demo-data scripts (`scripts/seed*.mjs`) are git-ignored too.
@@ -35,7 +35,7 @@ Create an **empty private repository** on github.com, then run the two commands 
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | public keys |
 | `SUPABASE_SERVICE_ROLE_KEY` | **secret** — server only |
 | `NEXT_PUBLIC_APP_URL` | your real address, **must start with `https://`** (turns on secure cookies, HSTS) |
-| `NEXT_PUBLIC_APP_NAME` | `StudentMarket` |
+| `NEXT_PUBLIC_APP_NAME` | `StudySwaps` |
 | `APP_SECRET` | long random string (signs addresses/tokens) |
 | `ESEWA_ENVIRONMENT`, `ESEWA_PRODUCT_CODE`, `ESEWA_SECRET_KEY` | production eSewa merchant values |
 | `CLOUDINARY_URL` | product photos |

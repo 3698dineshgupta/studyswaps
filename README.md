@@ -1,4 +1,4 @@
-# StudentMarket 🛍️
+# StudySwaps 🛍️
 
 > **Buy • Sell • Save Money • Support Fellow Students**
 

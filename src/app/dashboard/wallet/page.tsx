@@ -28,7 +28,7 @@ const LEDGER_LABELS: Record<string, { label: string; sign: 1 | -1 | 0 }> = {
 const W_STATUS: Record<string, string> = { REQUESTED: 'bg-amber-100 text-amber-800', PROCESSING: 'bg-sky-100 text-sky-800', COMPLETED: 'bg-green-100 text-green-800', FAILED: 'bg-red-100 text-red-700', CANCELLED: 'bg-gray-100 text-gray-600' };
 
 const STEPS = [
-  { Icon: Wallet, title: 'Buyer pays', text: `You earn the item price minus the ${SELLER_COMMISSION_RATE * 100}% StudentMarket fee. It's held safely as “Held”.` },
+  { Icon: Wallet, title: 'Buyer pays', text: `You earn the item price minus the ${SELLER_COMMISSION_RATE * 100}% StudySwaps fee. It's held safely as “Held”.` },
   { Icon: Hourglass, title: 'We deliver', text: 'We collect from you and deliver to the buyer. Delivery and the buyer’s platform fee are never taken from you.' },
   { Icon: BadgeCheck, title: 'Delivered', text: 'The moment we mark the order delivered, your earnings become “Available” to withdraw.' },
   { Icon: ArrowDownToLine, title: 'You withdraw', text: `Send Available earnings to your eSewa. Paid ${WITHDRAWAL.processingText}.` },
@@ -140,7 +140,7 @@ export default function DashboardWalletPage() {
         <div className="card p-5">
           <h2 className="mb-3 font-display font-bold text-ink">Fees</h2>
           <dl className="divide-y divide-gray-100 text-sm">
-            <div className="flex justify-between gap-4 py-2.5"><dt className="text-ink-muted">StudentMarket fee on each sale</dt><dd className="font-semibold text-ink">{SELLER_COMMISSION_RATE * 100}% of the item price</dd></div>
+            <div className="flex justify-between gap-4 py-2.5"><dt className="text-ink-muted">StudySwaps fee on each sale</dt><dd className="font-semibold text-ink">{SELLER_COMMISSION_RATE * 100}% of the item price</dd></div>
             <div className="flex justify-between gap-4 py-2.5"><dt className="text-ink-muted">Listing an item</dt><dd className="font-semibold text-ink">Free</dd></div>
             <div className="flex justify-between gap-4 py-2.5"><dt className="text-ink-muted">Delivery</dt><dd className="text-right font-semibold text-ink">Paid by the buyer</dd></div>
             <div className="flex justify-between gap-4 py-2.5"><dt className="text-ink-muted">Buyer platform fee ({formatPrice(PLATFORM_FEE)})</dt><dd className="text-right font-semibold text-ink">Paid by the buyer</dd></div>

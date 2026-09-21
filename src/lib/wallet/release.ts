@@ -2,7 +2,7 @@
  * Seller earnings: held → withdrawable. Server-side (service role) ONLY.
  *
  *  1. Buyer pays            → seller's PENDING balance += (item price − 5% commission)
- *  2. Order marked DELIVERED (by StudentMarket) → PENDING → AVAILABLE immediately
+ *  2. Order marked DELIVERED (by StudySwaps) → PENDING → AVAILABLE immediately
  *  3. Seller withdraws from AVAILABLE to eSewa.
  */
 import type { SupabaseClient } from '@supabase/supabase-js'

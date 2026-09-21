@@ -15,7 +15,7 @@ import { formatPrice } from '@/lib/utils'
 
 export const metadata: Metadata = {
   title: `Policies & terms — ${APP_NAME}`,
-  description: 'How StudentMarket works: terms of use, delivery, fees, payments, seller payouts, refunds, prohibited items and privacy.',
+  description: 'How StudySwaps works: terms of use, delivery, fees, payments, seller payouts, refunds, prohibited items and privacy.',
 }
 
 const EFFECTIVE = '20 September 2026'
@@ -37,7 +37,7 @@ const B = ({ children }: { children: ReactNode }) => <b className="font-semibold
 
 const SECTIONS: { id: string; title: string; Icon: typeof FileText; body: ReactNode }[] = [
   {
-    id: 'how-it-works', title: 'How StudentMarket works', Icon: Handshake,
+    id: 'how-it-works', title: 'How StudySwaps works', Icon: Handshake,
     body: (
       <>
         <P>{APP_NAME} is a marketplace where verified students sell books, gadgets, furniture and other second-hand things to other students. We act as the <B>mediator</B> between the two sides: the buyer and the seller <B>never need to meet, call or share their address</B>.</P>
@@ -64,7 +64,7 @@ const SECTIONS: { id: string; title: string; Icon: typeof FileText; body: ReactN
         <H>What you agree to</H>
         <UL items={[
           'Follow the law of Nepal and the rules on this page, including the prohibited items list.',
-          'Deal only through the platform. Do not ask a buyer or seller to pay, meet or deliver outside StudentMarket — it removes your protection and is a reason for suspension.',
+          'Deal only through the platform. Do not ask a buyer or seller to pay, meet or deliver outside StudySwaps — it removes your protection and is a reason for suspension.',
           'Do not share your buyer\'s or seller\'s personal contact details, or try to find them out.',
           'Do not misuse the service: no fake listings, fake orders, fake reviews, scraping, or attempts to break or overload the site.',
         ]} />
@@ -178,7 +178,7 @@ const SECTIONS: { id: string; title: string; Icon: typeof FileText; body: ReactN
         <H>What you earn</H>
         <UL items={[
           <>{APP_NAME} keeps a <B>{pct} commission</B> of the item price. You receive the other {100 - SELLER_COMMISSION_RATE * 100}%. Example: item sold for Rs. 1,000 → commission Rs. 50 → you earn Rs. 950.</>,
-          'The buyer\'s delivery fee and the platform fee belong to StudentMarket — they are never taken from your earnings.',
+          'The buyer\'s delivery fee and the platform fee belong to StudySwaps — they are never taken from your earnings.',
         ]} />
         <H>When you can withdraw</H>
         <UL items={[

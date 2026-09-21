@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getFastUser } from '@/lib/auth/session';
 import Link from 'next/link';
-import { GraduationCap } from 'lucide-react';
+import { BrandMark } from '@/components/brand/Logo';
 import AdminNav from '@/components/admin/AdminNav';
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
@@ -31,11 +31,9 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       <header className="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-2 px-4">
           <Link href="/admin" className="flex min-w-0 items-center gap-2.5">
-            <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-              <GraduationCap className="w-4 h-4 text-white" />
-            </div>
+            <BrandMark className="h-8" />
             <div>
-              <span className="font-bold text-gray-900 text-sm">StudentMarket</span>
+              <span className="font-bold text-gray-900 text-sm">StudySwaps</span>
               <span className="ml-2 text-xs text-gray-400">Admin</span>
             </div>
           </Link>

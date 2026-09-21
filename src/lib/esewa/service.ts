@@ -56,7 +56,7 @@ export interface EsewaCallbackData {
 function generatePaymentForm(params: {
   /** Item price(s) */
   amount: number
-  /** StudentMarket platform fee (sent as eSewa's service charge) */
+  /** StudySwaps platform fee (sent as eSewa's service charge) */
   serviceCharge?: number
   deliveryCharge?: number
   transactionUuid: string

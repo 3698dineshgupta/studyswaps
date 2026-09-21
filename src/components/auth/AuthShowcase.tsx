@@ -4,11 +4,12 @@ import Link from 'next/link'
 import { motion, useReducedMotion } from 'motion/react'
 import { Armchair, BadgeCheck, Bike, BookOpen, Laptop, Lightbulb, Shirt, ShieldCheck, Truck, Wallet } from 'lucide-react'
 import { APP_NAME } from '@/lib/constants'
+import { BrandMark, Wordmark } from '@/components/brand/Logo'
 import { EASE } from '@/lib/motion'
 
 // Decorative floating "listings" — icons only, no fake products or prices
 const FLOATERS = [
-  { Icon: BookOpen, x: '8%', y: '14%', size: 56, delay: 0, tint: 'from-sky-400/30 to-sky-500/10 text-sky-200' },
+  { Icon: BookOpen, x: '54%', y: '5%', size: 56, delay: 0, tint: 'from-sky-400/30 to-sky-500/10 text-sky-200' },
   { Icon: Laptop, x: '74%', y: '10%', size: 64, delay: 0.6, tint: 'from-violet-400/30 to-violet-500/10 text-violet-200' },
   { Icon: Bike, x: '84%', y: '46%', size: 52, delay: 1.2, tint: 'from-emerald-400/30 to-emerald-500/10 text-emerald-200' },
   { Icon: Lightbulb, x: '76%', y: '27%', size: 48, delay: 0.3, tint: 'from-amber-400/30 to-amber-500/10 text-amber-200' },
@@ -47,8 +48,8 @@ export default function AuthShowcase() {
       ))}
 
       <Link href="/" className="relative z-10 flex w-fit items-center gap-2.5" aria-label={`${APP_NAME} home`}>
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500 shadow-[0_8px_22px_-8px_rgba(34,197,94,0.9)]"><BookOpen className="h-5 w-5 text-white" /></span>
-        <span className="font-display text-xl font-bold tracking-tight">Student<span className="text-green-400">Market</span></span>
+        <span className="flex h-11 items-center rounded-2xl bg-white px-3 shadow-[0_8px_22px_-10px_rgba(0,0,0,0.6)]"><BrandMark className="h-8" /></span>
+        <Wordmark tone="dark" className="text-2xl" />
       </Link>
 
       <div className="relative z-10 max-w-md">

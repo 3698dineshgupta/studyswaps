@@ -1,5 +1,5 @@
 /**
- * StudentMarket money rules — the single source of truth for fees, delivery pricing
+ * StudySwaps money rules — the single source of truth for fees, delivery pricing
  * and payouts. Used by the checkout UI (to display), the orders API (to charge) and the
  * wallet code (to credit / release). The server ALWAYS recomputes; the UI only displays.
  *

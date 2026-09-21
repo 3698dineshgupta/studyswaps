@@ -18,7 +18,7 @@ export default function TrustSection() {
   return (
     <section aria-labelledby="trust-heading" className="page-container py-14 sm:py-20">
       <SectionHeading align="center" eyebrow="Trust" title="Buy with confidence" text="A marketplace built by students, for students — with safety designed in, not bolted on." />
-      <span id="trust-heading" className="sr-only">Why students trust StudentMarket</span>
+      <span id="trust-heading" className="sr-only">Why students trust StudySwaps</span>
       <RevealGroup className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5" gap={0.08}>
         {FEATURES.map(({ Icon, title, text }) => (
           <RevealItem key={title}>

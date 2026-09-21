@@ -13,7 +13,7 @@ import SignOutButton from '@/components/profile/SignOutButton';
 import type { CardProduct } from '@/components/marketplace/ProductCard';
 import { formatDate } from '@/lib/utils';
 
-export const metadata: Metadata = { title: 'Profile — StudentMarket' };
+export const metadata: Metadata = { title: 'Profile — StudySwaps' };
 export const dynamic = 'force-dynamic';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */

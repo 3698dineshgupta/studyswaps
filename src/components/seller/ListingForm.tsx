@@ -39,7 +39,7 @@ function FeeNotice({ price }: { price: number }) {
       <p className="font-display font-bold">What you&apos;ll earn</p>
       <dl className="space-y-1.5">
         <div className="flex justify-between"><dt>Your price</dt><dd className="font-semibold">{formatPrice(price)}</dd></div>
-        <div className="flex justify-between"><dt>StudentMarket fee ({SELLER_COMMISSION_RATE * 100}%)</dt><dd className="font-semibold">− {formatPrice(fee)}</dd></div>
+        <div className="flex justify-between"><dt>StudySwaps fee ({SELLER_COMMISSION_RATE * 100}%)</dt><dd className="font-semibold">− {formatPrice(fee)}</dd></div>
         <div className="flex justify-between border-t border-green-200 pt-1.5 text-base"><dt className="font-bold">You receive</dt><dd className="font-extrabold">{formatPrice(net)}</dd></div>
       </dl>
       <ul className="list-disc space-y-1 pl-5 text-xs leading-relaxed text-green-900/90">

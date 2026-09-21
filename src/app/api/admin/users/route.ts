@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     if (next !== 'ACTIVE') await admin.from('products').update({ status: 'SUSPENDED' }).eq('seller_id', userId).eq('status', 'ACTIVE');
 
     await audit(ctx, request, `ADMIN_USER_${action.toUpperCase()}`, 'profile', userId, { note: note ?? null, result: next }, { account_status: before.account_status });
-    await notify(userId, { type: 'SYSTEM', title: next === 'ACTIVE' ? 'Your account is active again' : 'Your account was restricted', body: next === 'ACTIVE' ? 'You can use StudentMarket normally again.' : `Your account was ${next.toLowerCase()}${note ? `: ${note}` : '.'} Contact support if you think this is a mistake.`, actionUrl: '/policies#community' });
+    await notify(userId, { type: 'SYSTEM', title: next === 'ACTIVE' ? 'Your account is active again' : 'Your account was restricted', body: next === 'ACTIVE' ? 'You can use StudySwaps normally again.' : `Your account was ${next.toLowerCase()}${note ? `: ${note}` : '.'} Contact support if you think this is a mistake.`, actionUrl: '/policies#community' });
     return NextResponse.json({ success: true, account_status: next });
   } catch (err) {
     console.error('[API] admin users POST', err instanceof Error ? err.message : 'unknown');

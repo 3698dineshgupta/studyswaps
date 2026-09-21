@@ -2,7 +2,7 @@ import { LAUNCH_CITIES } from '@/lib/cities'
 /**
  * Delivery on the client: what the buyer enters at checkout, and how it's validated / shown.
  *
- * StudentMarket is the mediator — we collect from the seller and deliver to the buyer's address;
+ * StudySwaps is the mediator — we collect from the seller and deliver to the buyer's address;
  * they never meet. Pricing lives in lib/pricing.ts (Rs 150 up to 10 km, +Rs 25 per extra km) and is
  * always recomputed on the server from a SIGNED address, so nothing here can change what is charged.
  */

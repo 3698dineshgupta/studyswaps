@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { APP_NAME } from '@/lib/constants'
 
 const GROUPS: { title: string; links: [string, string][] }[] = [
@@ -14,7 +15,7 @@ export default function SiteFooter() {
       <div className="page-container py-10">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div>
-            <p className="font-display text-lg font-extrabold text-ink">{APP_NAME}</p>
+            <Image src="/brand/logo-full.png" alt={APP_NAME} width={1045} height={683} className="h-24 w-auto -ml-1" />
             <p className="mt-2 max-w-xs text-sm leading-relaxed text-ink-muted">Buy and sell with verified students. We collect and deliver — buyer and seller never have to meet.</p>
           </div>
           {GROUPS.map((g) => (

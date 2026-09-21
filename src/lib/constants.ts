@@ -2,9 +2,9 @@
 // STUDENTMARKET — Application Constants
 // ============================================================
 
-export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'StudentMarket'
+export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'StudySwaps'
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-export const APP_TAGLINE = 'Buy • Sell • Save Money • Support Fellow Students'
+export const APP_TAGLINE = 'Buy • Sell • Reuse • Study'
 
 export const PLATFORM_FEE_PERCENT = 0 // 0% for now (student friendly)
 export const ESEWA_ENVIRONMENT = process.env.ESEWA_ENVIRONMENT || 'sandbox'
@@ -73,7 +73,7 @@ export const CATEGORIES = [
 
 // See lib/delivery.ts for the checkout delivery options, fees and pickup points
 export const DELIVERY_METHODS = [
-  { value: 'CAMPUS_PICKUP', label: 'Pickup Point', description: 'Collect from a StudentMarket pickup point in the city' },
+  { value: 'CAMPUS_PICKUP', label: 'Pickup Point', description: 'Collect from a StudySwaps pickup point in the city' },
   { value: 'LOCAL_DELIVERY', label: 'Home Delivery', description: 'Delivered to your address within the city' },
 ]
 

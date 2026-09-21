@@ -170,7 +170,7 @@ export default function CheckoutPage() {
                         </div>
                       ))}
                     </div>
-                    <p className="rounded-xl bg-green-50 p-3 text-xs text-green-800">StudentMarket collects your item from the seller and delivers it to you — no meeting required.</p>
+                    <p className="rounded-xl bg-green-50 p-3 text-xs text-green-800">StudySwaps collects your item from the seller and delivers it to you — no meeting required.</p>
                     <p className="text-center text-[11px] leading-relaxed text-ink-muted">
                       By paying you agree to our <Link href="/policies#terms" target="_blank" className="font-medium text-green-700 underline-offset-2 hover:underline">Terms</Link>,{' '}
                       <Link href="/policies#delivery" target="_blank" className="font-medium text-green-700 underline-offset-2 hover:underline">Delivery</Link> and{' '}

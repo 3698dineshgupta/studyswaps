@@ -124,7 +124,7 @@ function ProductView({ product, id }: { product: any; id: string }) {
   const share = async () => {
     const url = window.location.href;
     try {
-      if (navigator.share) await navigator.share({ title: product.title, text: `${product.title} on StudentMarket`, url });
+      if (navigator.share) await navigator.share({ title: product.title, text: `${product.title} on StudySwaps`, url });
       else { await navigator.clipboard.writeText(url); toast.success('Link copied'); }
     } catch { /* cancelled */ }
   };
@@ -250,7 +250,7 @@ function ProductView({ product, id }: { product: any; id: string }) {
                 </div>
               </div>
             </div>
-            <a href={supportWhatsAppUrl(`Hi StudentMarket support, I have a question about "${product.title}" (ID: ${product.id})`)} target="_blank" rel="noopener noreferrer" className="btn-secondary mt-4 w-full justify-center px-4 py-2.5 text-sm"><MessageCircle className="h-4 w-4" /> Contact support</a>
+            <a href={supportWhatsAppUrl(`Hi StudySwaps support, I have a question about "${product.title}" (ID: ${product.id})`)} target="_blank" rel="noopener noreferrer" className="btn-secondary mt-4 w-full justify-center px-4 py-2.5 text-sm"><MessageCircle className="h-4 w-4" /> Contact support</a>
           </motion.section>
 
           {/* Location */}

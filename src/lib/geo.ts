@@ -81,7 +81,7 @@ async function photonSearch(q: string, zones: typeof LAUNCH_CITIES): Promise<Pla
   const all = await Promise.all(zones.map(async (z) => {
     const url = new URL('https://photon.komoot.io/api/')
     url.search = new URLSearchParams({ q, limit: '10', lang: 'en', lat: String(z.center.lat), lon: String(z.center.lon), bbox: `${z.viewbox[0]},${z.viewbox[1]},${z.viewbox[2]},${z.viewbox[3]}` }).toString()
-    const res = await fetch(url, { headers: { 'User-Agent': 'StudentMarket/1.0 (student marketplace, Nepal)' }, signal: AbortSignal.timeout(8000) })
+    const res = await fetch(url, { headers: { 'User-Agent': 'StudySwaps/1.0 (student marketplace, Nepal)' }, signal: AbortSignal.timeout(8000) })
     if (!res.ok) return []
     return ((await res.json()).features ?? []) as PhotonFeature[]
   }))
@@ -110,7 +110,7 @@ export async function searchPlaces(query: string, city?: CitySlug | null): Promi
     if (zone) { params.viewbox = zone.viewbox.join(','); params.bounded = '1' }
     url.search = new URLSearchParams(params).toString()
     const rows = await throttled(async () => {
-      const res = await fetch(url, { headers: { 'User-Agent': 'StudentMarket/1.0 (student marketplace, Nepal)', Accept: 'application/json' }, signal: AbortSignal.timeout(10000) })
+      const res = await fetch(url, { headers: { 'User-Agent': 'StudySwaps/1.0 (student marketplace, Nepal)', Accept: 'application/json' }, signal: AbortSignal.timeout(10000) })
       if (!res.ok) throw new Error(`Address search failed (${res.status})`)
       return (await res.json()) as NominatimHit[]
     })
@@ -138,7 +138,7 @@ export async function reversePlace(lat: number, lon: number): Promise<Place | nu
   const url = new URL('https://nominatim.openstreetmap.org/reverse')
   url.search = new URLSearchParams({ lat: String(lat), lon: String(lon), format: 'jsonv2', addressdetails: '1', zoom: '17', 'accept-language': 'en' }).toString()
   const hit = await throttled(async () => {
-    const res = await fetch(url, { headers: { 'User-Agent': 'StudentMarket/1.0 (student marketplace, Nepal)', Accept: 'application/json' }, signal: AbortSignal.timeout(10000) })
+    const res = await fetch(url, { headers: { 'User-Agent': 'StudySwaps/1.0 (student marketplace, Nepal)', Accept: 'application/json' }, signal: AbortSignal.timeout(10000) })
     if (!res.ok) throw new Error(`Reverse lookup failed (${res.status})`)
     return (await res.json()) as NominatimHit
   })

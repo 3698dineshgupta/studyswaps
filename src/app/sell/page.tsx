@@ -7,7 +7,7 @@ import Header from '@/components/layout/Header';
 import MobileNav from '@/components/layout/MobileNav';
 import SellerVerificationGate from '@/components/verification/SellerVerificationGate';
 
-export const metadata: Metadata = { title: 'Sell — StudentMarket' };
+export const metadata: Metadata = { title: 'Sell — StudySwaps' };
 
 export default async function SellPage() {
   const supabase = createClient();

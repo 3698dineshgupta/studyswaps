@@ -39,7 +39,7 @@ export async function adminSetOrderStatus(ctx: AdminContext, orderId: string, st
   // Delivery timeline
   const { data: delivery } = await admin.from('deliveries').update({ current_status: status }).eq('order_id', orderId).select('id').maybeSingle()
   if (delivery) {
-    await admin.from('delivery_events').insert({ delivery_id: delivery.id, status, description: note || `Updated by StudentMarket: ${LABEL[status] ?? status}`, actor_id: profile.id, actor_type: 'admin' })
+    await admin.from('delivery_events').insert({ delivery_id: delivery.id, status, description: note || `Updated by StudySwaps: ${LABEL[status] ?? status}`, actor_id: profile.id, actor_type: 'admin' })
   }
 
   let refundNeeded = false
@@ -59,7 +59,7 @@ export async function adminSetOrderStatus(ctx: AdminContext, orderId: string, st
   const words = LABEL[status] ?? status.toLowerCase()
   await Promise.all([
     notify(order.buyer_id, { type: 'ORDER_UPDATE', title: `Order ${order.order_number} ${words}`, body: refundNeeded ? `Your order was ${words}. Your refund of Rs. ${Number(order.total).toLocaleString()} goes back to your eSewa.` : `Your order is now ${words}.`, actionUrl: `/orders/${orderId}` }),
-    notify(order.seller_id, { type: 'ORDER_UPDATE', title: `Order ${order.order_number} ${words}`, body: `StudentMarket updated this order: ${words}.${note ? ` ${note}` : ''}`, actionUrl: '/dashboard/orders' }),
+    notify(order.seller_id, { type: 'ORDER_UPDATE', title: `Order ${order.order_number} ${words}`, body: `StudySwaps updated this order: ${words}.${note ? ` ${note}` : ''}`, actionUrl: '/dashboard/orders' }),
   ])
   if (refundNeeded) {
     TelegramService.sendAdminNotification(`REFUND REQUIRED\nOrder: ${order.order_number}\nAmount: Rs. ${order.total}\nStatus: ${status}\nBy: ${profile.full_name ?? 'admin'}\nSend the refund through eSewa, then note it in the order.`).catch(() => {})

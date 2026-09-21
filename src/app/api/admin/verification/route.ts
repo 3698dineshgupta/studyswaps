@@ -210,8 +210,8 @@ export async function POST(request: NextRequest) {
     });
 
     await notify(vr.profile_id, approved
-      ? { type: 'VERIFICATION_STATUS', title: "You're verified!", body: 'Your student identity was approved. You can now list items for sale and get paid on StudentMarket.', actionUrl: '/sell', email: { subject: 'You are verified on StudentMarket ✅', cta: 'Start selling' } }
-      : { type: 'VERIFICATION_STATUS', title: 'Verification needs attention', body: `Your verification was not approved${rejectionReason ? `: ${rejectionReason}` : ''}. You can submit a new live photo.`, actionUrl: '/verify', email: { subject: 'Your StudentMarket verification needs attention', cta: 'Try again' } });
+      ? { type: 'VERIFICATION_STATUS', title: "You're verified!", body: 'Your student identity was approved. You can now list items for sale and get paid on StudySwaps.', actionUrl: '/sell', email: { subject: 'You are verified on StudySwaps ✅', cta: 'Start selling' } }
+      : { type: 'VERIFICATION_STATUS', title: 'Verification needs attention', body: `Your verification was not approved${rejectionReason ? `: ${rejectionReason}` : ''}. You can submit a new live photo.`, actionUrl: '/verify', email: { subject: 'Your StudySwaps verification needs attention', cta: 'Try again' } });
 
     TelegramService.sendAdminNotification(
       `${approved ? '✅' : '❌'} VERIFICATION ${newStatus}\n\nRequest: ${vr.verification_number}\nStudent: ${vr.full_name}\nReviewer: ${reviewer.full_name}${

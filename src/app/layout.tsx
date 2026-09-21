@@ -43,11 +43,8 @@ export const metadata: Metadata = {
       follow: true,
     },
   },
+  // Icons come from the files in src/app: icon.png + favicon.ico (browser tab), apple-icon.png (home screen), opengraph-image.png (link previews)
   manifest: '/manifest.json',
-  icons: {
-    icon: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
-  },
 }
 
 export const viewport: Viewport = {
