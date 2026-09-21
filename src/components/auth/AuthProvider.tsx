@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
 import { getSupabase } from '@/lib/supabase/lazy'
 import type { Profile } from '@/types'
 import { fetchOwnProfile } from '@/lib/profile'
@@ -26,6 +27,7 @@ const Ctx = createContext<AuthState | null>(null)
  */
 export function AuthProvider({ initialProfile, initialIsAdmin = false, children }: { initialProfile: Profile | null; initialIsAdmin?: boolean; children: React.ReactNode }) {
   const router = useRouter()
+  const qc = useQueryClient()
   const [profile, setProfile] = useState<Profile | null>(initialProfile)
   const busy = useRef(false)
   const [isAdmin, setIsAdmin] = useState(initialIsAdmin)
@@ -33,6 +35,16 @@ export function AuthProvider({ initialProfile, initialIsAdmin = false, children 
 
   // The server re-rendered (login, logout, router.refresh()) → adopt its answer
   useEffect(() => { setProfile(initialProfile) }, [initialProfile])
+
+  // Signing in or out changes whose cart this is. The cart that was cached while browsing as a guest ("guest: true")
+  // must not survive a login — it made every Add to cart say "Log in to add items" for someone who was signed in.
+  const accountId = initialProfile?.id ?? null
+  const lastAccount = useRef(accountId)
+  useEffect(() => {
+    if (lastAccount.current === accountId) return
+    lastAccount.current = accountId
+    void qc.invalidateQueries({ queryKey: ['cart'] })
+  }, [accountId, qc])
 
   const refreshProfile = useCallback(async () => {
     if (busy.current) return

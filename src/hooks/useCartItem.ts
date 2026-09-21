@@ -131,7 +131,14 @@ export function useCartControls(product: CardProduct): CartControls {
   }, [qc, product, settle])
 
   const add = useCallback((onFail?: () => void) => {
-    if (current()?.guest) { goLogin(); return false }
+    if (current()?.guest) {
+      // The cached cart may date from before this person signed in. Ask the server again before sending them to log in.
+      void qc.fetchQuery({ ...cartQuery, staleTime: 0 }).then((fresh: any) => {
+        if (fresh?.guest) goLogin()
+        else void setTo(1, () => call('POST', { productId: product.id, quantity: 1 }), onFail)
+      }).catch(() => goLogin())
+      return false
+    }
     void setTo(1, () => call('POST', { productId: product.id, quantity: 1 }), onFail)
     return true
     // eslint-disable-next-line react-hooks/exhaustive-deps
