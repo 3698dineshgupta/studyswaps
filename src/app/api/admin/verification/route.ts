@@ -78,8 +78,9 @@ export async function GET(request: NextRequest) {
 
     // Live captures live in a separate PRIVATE bucket; links expire after 2 minutes
     const identityPaths = rows.map((r) => r.identity_verifications?.image_path).filter(Boolean) as string[];
+    const frontOf = (p: string) => p.replace(/identity_capture\.jpg$/, 'id_front.jpg');
     const identitySigned = identityPaths.length
-      ? (await admin.storage.from(IDENTITY_BUCKET).createSignedUrls(identityPaths, 120)).data ?? []
+      ? (await admin.storage.from(IDENTITY_BUCKET).createSignedUrls([...identityPaths, ...identityPaths.map(frontOf)], 120)).data ?? []
       : [];
     const identityUrl = new Map(identitySigned.map((s: any) => [s.path, s.signedUrl]));
 
@@ -96,8 +97,9 @@ export async function GET(request: NextRequest) {
 
     const requests = rows.map((r) => {
       const idv = r.identity_verifications;
+      const frontUrl = idv ? identityUrl.get(frontOf(idv.image_path)) : null;
       const liveDoc = idv
-        ? [{
+        ? [...(frontUrl ? [{ id: `${idv.id}-front`, document_type: 'ID_CARD_FRONT', storage_path: frontOf(idv.image_path), signed_url: frontUrl }] : []), {
             id: idv.id,
             document_type: 'LIVE_CAPTURE',
             storage_path: idv.image_path,

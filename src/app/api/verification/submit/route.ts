@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { createServerClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { TelegramService } from '@/lib/telegram/service';
-import { IDENTITY_ERRORS } from '@/lib/identity';
+import { IDENTITY_BUCKET, IDENTITY_ERRORS } from '@/lib/identity';
 import { rateLimit, LIMITS } from '@/lib/security/rateLimit';
 
 const METHODS = {
@@ -74,6 +74,10 @@ export async function POST(request: NextRequest) {
       return fail('SESSION_EXPIRED', 'Your photo is too old. Please retake it.');
     }
 
+    // The ID card front must be on file next to the selfie
+    const { data: files } = await admin.storage.from(IDENTITY_BUCKET).list(`${user.id}/${verificationId}`);
+    if (!files?.some((f) => f.name === 'id_front.jpg')) return fail('ID_CARD_MISSING');
+
     const { data: created, error: requestError } = await admin
       .from('verification_requests')
       .insert({
@@ -96,6 +100,10 @@ export async function POST(request: NextRequest) {
     }
 
     await admin.from('identity_verifications').update({ status: 'under_review' }).eq('id', capture.id);
+
+    // The temporary copy of the card photo is no longer needed
+    const { data: temp } = await admin.storage.from(IDENTITY_BUCKET).list(`${user.id}/cards`);
+    if (temp?.length) await admin.storage.from(IDENTITY_BUCKET).remove(temp.map((f) => `${user.id}/cards/${f.name}`));
 
     await admin
       .from('profiles')

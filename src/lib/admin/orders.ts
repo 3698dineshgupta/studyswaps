@@ -58,8 +58,8 @@ export async function adminSetOrderStatus(ctx: AdminContext, orderId: string, st
 
   const words = LABEL[status] ?? status.toLowerCase()
   await Promise.all([
-    notify(order.buyer_id, { type: 'ORDER_UPDATE', title: `Order ${order.order_number} ${words}`, body: refundNeeded ? `Your order was ${words}. Your refund of Rs. ${Number(order.total).toLocaleString()} goes back to your eSewa.` : `Your order is now ${words}.`, actionUrl: `/orders/${orderId}` }),
-    notify(order.seller_id, { type: 'ORDER_UPDATE', title: `Order ${order.order_number} ${words}`, body: `StudySwaps updated this order: ${words}.${note ? ` ${note}` : ''}`, actionUrl: '/dashboard/orders' }),
+    notify(order.buyer_id, { type: 'ORDER_UPDATE', title: `Order ${order.order_number} ${words}`, body: refundNeeded ? `Your order was ${words}. Your refund of Rs. ${Number(order.total).toLocaleString()} goes back to your eSewa.` : `Your order is now ${words}.`, actionUrl: `/orders/${orderId}`, email: { subject: `Order ${order.order_number} is ${words}`, cta: 'View my order' } }),
+    notify(order.seller_id, { type: 'ORDER_UPDATE', title: `Order ${order.order_number} ${words}`, body: `StudySwaps updated this order: ${words}.${note ? ` ${note}` : ''}`, actionUrl: '/dashboard/orders', email: { subject: `Order ${order.order_number} is ${words}`, cta: 'View the order' } }),
   ])
   if (refundNeeded) {
     TelegramService.sendAdminNotification(`REFUND REQUIRED\nOrder: ${order.order_number}\nAmount: Rs. ${order.total}\nStatus: ${status}\nBy: ${profile.full_name ?? 'admin'}\nSend the refund through eSewa, then note it in the order.`).catch(() => {})

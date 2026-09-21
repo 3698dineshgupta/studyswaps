@@ -15,8 +15,8 @@ const reg = (n) => post('/api/auth/register', { full_name: 'Limit Test', email: 
 try {
   console.log('— sign-up limits —')
   let codes = []
-  for (let i = 0; i < 4; i++) { const r = await reg(i); codes.push(r.status); if (r.status === 201) emails.push(`lim-${i}-${stamp}@studentmarket.test`) }
-  check('L1', 'first 3 sign-ups from one connection succeed, the 4th is refused', codes.slice(0, 3).every((c) => c === 201) && codes[3] === 429, codes.join(','))
+  for (let i = 0; i < 11; i++) { const r = await reg(i); codes.push(r.status); if (r.status === 201) emails.push(`lim-${i}-${stamp}@studentmarket.test`) }
+  check('L1', 'first 10 sign-ups from one connection succeed, the 11th is refused', codes.slice(0, 10).every((c) => c === 201) && codes[10] === 429, codes.join(','))
   let r = await post('/api/auth/register', { full_name: 'x', email: 'bad', password: '1', phone: '1', college: '', location: 'Kathmandu', intent: 'buyer' }); check('L2', 'invalid sign-up data is refused', r.status === 400 || r.status === 429, `status ${r.status}`)
   r = await post('/api/auth/register', { full_name: 'Sneaky Admin', email: `x-${stamp}@studentmarket.test`, password: 'Limit-Test-9x!', phone: '9812345678', college: 'C', location: 'Kathmandu', intent: 'buyer', role: 'admin', is_admin: true }); check('L3', 'extra fields like role/is_admin are rejected', r.status === 400 || r.status === 429, `status ${r.status}`)
 

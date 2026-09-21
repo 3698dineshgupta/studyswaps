@@ -113,15 +113,15 @@ export const LIMITS = {
   photoUpload: { name: 'photo-upload', limit: 40, windowMs: 3_600_000 },
   geocode: { name: 'geocode', limit: 60, windowMs: 60_000 },
   withdraw: { name: 'withdraw', limit: 6, windowMs: 3_600_000 },
-  identity: { name: 'identity', limit: 10, windowMs: 3_600_000 },
+  identity: { name: 'identity', limit: 24, windowMs: 3_600_000 },
   orderStatus: { name: 'order-status', limit: 60, windowMs: 60_000 },
   admin: { name: 'admin', limit: 120, windowMs: 60_000 },
   authSync: { name: 'auth-sync', limit: 30, windowMs: 60_000 },
   // Accounts: a person can try a password a handful of times, then must wait. Signing up is capped per IP and overall.
   loginIp: { name: 'login-ip', limit: 40, windowMs: 15 * 60_000 },
   loginAccount: { name: 'login-account', limit: 8, windowMs: 15 * 60_000 },
-  signupIpHour: { name: 'signup-ip-hour', limit: 3, windowMs: 3_600_000 },
-  signupIpDay: { name: 'signup-ip-day', limit: 8, windowMs: 86_400_000 },
+  signupIpHour: { name: 'signup-ip-hour', limit: 10, windowMs: 3_600_000 },
+  signupIpDay: { name: 'signup-ip-day', limit: 30, windowMs: 86_400_000 },
   signupEmail: { name: 'signup-email', limit: 3, windowMs: 3_600_000 },
   signupGlobal: { name: 'signup-global', limit: 400, windowMs: 86_400_000 },
 } satisfies Record<string, RateRule>

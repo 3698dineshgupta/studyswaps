@@ -18,7 +18,7 @@ const schema = z.object({
 }).strict();
 
 // POST /api/auth/register — account creation through OUR server so it can be limited:
-//   • 3 accounts / hour and 8 / day per IP, 3 attempts / hour per email, 400 / day overall (circuit breaker)
+//   • 10 accounts / hour and 30 / day per IP (a college network shares one IP), 3 attempts / hour per email, 400 / day overall (circuit breaker)
 // The profile details are written by the server, not trusted from the browser's metadata.
 export async function POST(request: NextRequest) {
   try {

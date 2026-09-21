@@ -10,26 +10,18 @@ import {
   MAX_FRAME_BYTES,
   MIN_LIVENESS_SCORE,
   checkImage,
+  ensureIdentityBucket,
+  idCardTempPath,
+  idFrontPath,
   identityImagePath,
   livenessScore,
   normalizeCapture,
+  verifyCardToken,
   verifySession,
 } from '@/lib/identity';
 
 const fail = (code: keyof typeof IDENTITY_ERRORS) =>
   NextResponse.json({ error: IDENTITY_ERRORS[code].message, code }, { status: IDENTITY_ERRORS[code].status });
-
-let bucketReady = false;
-async function ensurePrivateBucket(admin: ReturnType<typeof createAdminClient>) {
-  if (bucketReady) return;
-  const { error } = await admin.storage.createBucket(IDENTITY_BUCKET, {
-    public: false,
-    fileSizeLimit: MAX_CAPTURE_BYTES,
-    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
-  });
-  if (error && !/already exists|duplicate/i.test(error.message)) throw error;
-  bucketReady = true;
-}
 
 // POST /api/identity-verification — multipart: session_token, capture, frame_1, frame_2
 //
@@ -71,6 +63,10 @@ export async function POST(request: NextRequest) {
     if (!session.ok) return fail(session.error);
     const { v: verificationId, c: challenge } = session.payload;
 
+    // The front of the ID card must have been captured first; its token proves it is this user's photo
+    const cardId = verifyCardToken(String(form.get('id_card_token') ?? ''), user.id);
+    if (!cardId) return fail(form.get('id_card_token') ? 'ID_CARD_INVALID' : 'ID_CARD_MISSING');
+
     const capture = form.get('capture');
     if (!(capture instanceof File) || capture.size === 0) return fail('MISSING_CAPTURE');
 
@@ -95,12 +91,20 @@ export async function POST(request: NextRequest) {
     const jpeg = await normalizeCapture(captureCheck.buffer);
     const imagePath = identityImagePath(user.id, verificationId);
 
-    await ensurePrivateBucket(admin);
+    await ensureIdentityBucket(admin);
     const { error: uploadError } = await admin.storage
       .from(IDENTITY_BUCKET)
       .upload(imagePath, jpeg, { contentType: 'image/jpeg', cacheControl: '0', upsert: false });
     if (uploadError) {
       return /already exists|duplicate/i.test(uploadError.message) ? fail('ALREADY_USED') : fail('STORAGE_ERROR');
+    }
+
+    // Attach the ID card photo to this verification (a copy, so a retaken selfie can attach it again)
+    const frontPath = idFrontPath(user.id, verificationId);
+    const { error: copyError } = await admin.storage.from(IDENTITY_BUCKET).copy(idCardTempPath(user.id, cardId), frontPath);
+    if (copyError && !/already exists|duplicate/i.test(copyError.message)) {
+      await admin.storage.from(IDENTITY_BUCKET).remove([imagePath]);
+      return fail('ID_CARD_INVALID');
     }
 
     const capturedAt = new Date().toISOString(); // server time, not client time
@@ -117,7 +121,7 @@ export async function POST(request: NextRequest) {
       file_size: jpeg.length,
     });
     if (insertError) {
-      await admin.storage.from(IDENTITY_BUCKET).remove([imagePath]);
+      await admin.storage.from(IDENTITY_BUCKET).remove([imagePath, frontPath]);
       return insertError.code === '23505' ? fail('ALREADY_USED') : fail('SERVER_ERROR');
     }
 
@@ -129,7 +133,7 @@ export async function POST(request: NextRequest) {
       .eq('status', 'pending')
       .neq('verification_id', verificationId);
     if (stale?.length) {
-      await admin.storage.from(IDENTITY_BUCKET).remove(stale.map((s) => s.image_path));
+      await admin.storage.from(IDENTITY_BUCKET).remove(stale.flatMap((s) => [s.image_path, s.image_path.replace(/identity_capture\.jpg$/, 'id_front.jpg')]));
       await admin.from('identity_verifications').delete().in('id', stale.map((s) => s.id));
     }
 
@@ -141,7 +145,7 @@ export async function POST(request: NextRequest) {
       action: 'IDENTITY_CAPTURE_RECEIVED',
       entity_type: 'identity_verification',
       entity_id: verificationId,
-      new_data: { challenge, liveness_score: score, size: jpeg.length },
+      new_data: { challenge, liveness_score: score, size: jpeg.length, id_card: true },
     });
 
     return NextResponse.json({ success: true, verification_id: verificationId, captured_at: capturedAt, status: 'pending' }, { status: 201 });

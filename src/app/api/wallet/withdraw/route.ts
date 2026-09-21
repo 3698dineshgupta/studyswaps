@@ -121,6 +121,7 @@ export async function POST(request: NextRequest) {
       title: 'Withdrawal requested',
       body: `Rs. ${amount.toLocaleString()} will be sent to eSewa ${esewaId} ${WITHDRAWAL.processingText}.`,
       actionUrl: '/dashboard/wallet',
+      email: { subject: 'We received your withdrawal request', cta: 'Open my wallet' },
     });
 
     TelegramService.sendAdminNotification(`💸 WITHDRAWAL REQUEST\n\nSeller: ${profile.full_name}\nAmount: Rs. ${amount}\neSewa: ${esewaId}`)

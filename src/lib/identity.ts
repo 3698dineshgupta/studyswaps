@@ -173,5 +173,54 @@ export const IDENTITY_ERRORS: Record<string, { status: number; message: string }
   ALREADY_VERIFIED: { status: 409, message: 'Your identity is already verified.' },
   PENDING_REVIEW: { status: 409, message: 'A verification request is already pending review.' },
   STORAGE_ERROR: { status: 502, message: "We couldn't store your photo. Please try again." },
+  ID_CARD_MISSING: { status: 400, message: 'Please capture the front of your ID card first.' },
+  ID_CARD_INVALID: { status: 400, message: 'Your ID card photo expired or could not be found. Please capture it again.' },
   SERVER_ERROR: { status: 500, message: 'Something went wrong on our side. Please try again.' },
+}
+
+// ---------------------------------------------------------------------------
+// ID card (front) — captured live BEFORE the selfie-with-ID. It is uploaded on its own, then attached to the
+// selfie's verification id by the server, so the two photos always travel together.
+// ---------------------------------------------------------------------------
+
+export const CARD_TOKEN_TTL_MS = 60 * 60 * 1000
+
+/** Where a just-captured ID card waits until the selfie is uploaded. */
+export const idCardTempPath = (userId: string, cardId: string) => `${userId}/cards/${cardId}.jpg`
+/** Final location, next to the selfie of the same verification. */
+export const idFrontPath = (userId: string, verificationId: string) => `${userId}/${verificationId}/id_front.jpg`
+
+export function createCardToken(userId: string) {
+  const cardId = randomUUID()
+  const body = b64url(JSON.stringify({ k: cardId, u: userId, exp: Date.now() + CARD_TOKEN_TTL_MS }))
+  return { cardId, token: `${body}.${sign(body)}` }
+}
+
+/** Returns the card id when the token is genuine, unexpired and belongs to this user. */
+export function verifyCardToken(token: string, userId: string): string | null {
+  const [body, sig] = String(token ?? '').split('.')
+  if (!body || !sig) return null
+  const expected = Buffer.from(sign(body))
+  const actual = Buffer.from(sig)
+  if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) return null
+  try {
+    const p = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as { k: string; u: string; exp: number }
+    if (p.u !== userId || Date.now() > p.exp || !/^[0-9a-f-]{36}$/.test(p.k)) return null
+    return p.k
+  } catch {
+    return null
+  }
+}
+
+let bucketReady = false
+/** Create the private bucket on first use. */
+export async function ensureIdentityBucket(admin: import('@supabase/supabase-js').SupabaseClient) {
+  if (bucketReady) return
+  const { error } = await admin.storage.createBucket(IDENTITY_BUCKET, {
+    public: false,
+    fileSizeLimit: MAX_CAPTURE_BYTES,
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
+  })
+  if (error && !/already exists|duplicate/i.test(error.message)) throw error
+  bucketReady = true
 }

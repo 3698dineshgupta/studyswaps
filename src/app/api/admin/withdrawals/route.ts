@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     if (action === 'processing') {
       await admin.from('withdrawals').update({ status: 'PROCESSING', processed_by: profile.id }).eq('id', id).eq('status', 'REQUESTED');
       await audit(ctx, request, 'WITHDRAWAL_PROCESSING', 'withdrawal', id, {});
-      await notify(wd.seller_id, { type: 'WITHDRAWAL_UPDATE', title: 'Your withdrawal is being processed', body: `${money} is being sent to your eSewa.`, actionUrl: '/dashboard/wallet' });
+      await notify(wd.seller_id, { type: 'WITHDRAWAL_UPDATE', title: 'Your withdrawal is being processed', body: `${money} is being sent to your eSewa.`, actionUrl: '/dashboard/wallet', email: { subject: 'Your withdrawal is being processed', cta: 'Open my wallet' } });
       return NextResponse.json({ success: true, status: 'PROCESSING' });
     }
 
@@ -75,8 +75,8 @@ export async function POST(request: NextRequest) {
 
     await audit(ctx, request, action === 'paid' ? 'WITHDRAWAL_PAID' : 'WITHDRAWAL_REJECTED', 'withdrawal', id, { reference: reference ?? null, reason: reason ?? null, amount: wd.amount });
     await notify(wd.seller_id, action === 'paid'
-      ? { type: 'WITHDRAWAL_UPDATE', title: `${money} sent to your eSewa`, body: `Your withdrawal was paid. eSewa reference: ${reference}.`, actionUrl: '/dashboard/wallet' }
-      : { type: 'WITHDRAWAL_UPDATE', title: 'Withdrawal not paid', body: `We couldn't pay ${money}: ${reason}. The money is back in your available balance.`, actionUrl: '/dashboard/wallet' });
+      ? { type: 'WITHDRAWAL_UPDATE', title: `${money} sent to your eSewa`, body: `Your withdrawal was paid. eSewa reference: ${reference}.`, actionUrl: '/dashboard/wallet', email: { subject: `${money} sent to your eSewa`, cta: 'Open my wallet' } }
+      : { type: 'WITHDRAWAL_UPDATE', title: 'Withdrawal not paid', body: `We couldn't pay ${money}: ${reason}. The money is back in your available balance.`, actionUrl: '/dashboard/wallet', email: { subject: 'Your withdrawal was not paid', cta: 'Open my wallet' } });
     TelegramService.sendAdminNotification(`WITHDRAWAL ${action === 'paid' ? 'PAID' : 'REJECTED'}\nAmount: ${money}\n${action === 'paid' ? `Ref: ${reference}` : `Reason: ${reason}`}\nBy: ${profile.full_name ?? 'admin'}`).catch(() => {});
     return NextResponse.json({ success: true, status: action === 'paid' ? 'COMPLETED' : 'FAILED' });
   } catch (err) {

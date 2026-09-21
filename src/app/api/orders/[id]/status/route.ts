@@ -125,6 +125,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       title: `Order ${order.order_number}: ${(DESCRIPTIONS[newStatus] ?? newStatus).replace(/^(Seller|Buyer|Order) (has |is )?/i, '')}`,
       body: `${DESCRIPTIONS[newStatus] ?? newStatus}.${extra}`,
       actionUrl: link,
+      email: { subject: `Order ${order.order_number} update`, cta: 'View the order' },
     });
 
     await admin.from('audit_logs').insert({

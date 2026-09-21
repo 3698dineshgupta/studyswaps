@@ -56,6 +56,7 @@ export async function releaseOrderFunds(admin: SupabaseClient, orderId: string):
     title: `${fmt(net)} is ready to withdraw`,
     body: `Earnings from order ${order.order_number} are now in your available balance.`,
     actionUrl: '/dashboard/wallet',
+    email: { subject: `${fmt(net)} is ready to withdraw`, cta: 'Open my wallet' },
   })
 
   return { released: true, amount: net }

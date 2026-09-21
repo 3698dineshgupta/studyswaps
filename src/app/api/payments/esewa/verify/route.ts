@@ -220,8 +220,8 @@ Transaction: ${callback.transaction_code}`).catch(() => {});
     });
 
     await Promise.all([
-      notify(order.buyer_id, { type: 'PAYMENT_UPDATE', title: 'Payment received', body: `We received your payment for order ${order.order_number}. The seller has been notified.`, actionUrl: `/orders/${order.id}` }),
-      notify(order.seller_id, { type: 'ORDER_UPDATE', title: 'New order to prepare', body: `Order ${order.order_number} has been paid. You'll earn Rs. ${sellerNet.toLocaleString()} (after the ${SELLER_COMMISSION_RATE * 100}% fee) once delivery is confirmed. Please get the item ready for handover.`, actionUrl: `/dashboard/orders` }),
+      notify(order.buyer_id, { type: 'PAYMENT_UPDATE', title: 'Payment received', body: `We received your payment for order ${order.order_number}. The seller has been notified.`, actionUrl: `/orders/${order.id}`, email: { subject: `Payment received for order ${order.order_number}`, cta: 'View my order' } }),
+      notify(order.seller_id, { type: 'ORDER_UPDATE', title: 'New order to prepare', body: `Order ${order.order_number} has been paid. You'll earn Rs. ${sellerNet.toLocaleString()} (after the ${SELLER_COMMISSION_RATE * 100}% fee) once delivery is confirmed. Please get the item ready for handover.`, actionUrl: `/dashboard/orders`, email: { subject: `New order ${order.order_number} — please get the item ready`, cta: 'See the order' } }),
     ]);
 
     TelegramService.sendAdminNotification(

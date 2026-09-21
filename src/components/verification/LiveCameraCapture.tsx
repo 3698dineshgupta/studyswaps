@@ -33,6 +33,10 @@ interface Props {
   onComplete: (verificationId: string) => void;
   /** Set when a capture already exists (user navigated back to this step). */
   existingVerificationId?: string;
+  /** Token from the ID card step; the server attaches that photo to this selfie. */
+  idCardToken?: string;
+  /** The ID card photo is missing or expired → the parent should send the user back to that step. */
+  onIdCardProblem?: () => void;
 }
 
 const CHALLENGE_SECONDS = 3;
@@ -41,7 +45,7 @@ const STRAIGHTEN_SECONDS = 2;
 /** Codes for which the only sensible action is to take a new photo */
 const RETAKE_CODES = new Set(['INVALID_IMAGE', 'FILE_TOO_LARGE', 'IMAGE_TOO_SMALL', 'LIVENESS_FAILED', 'INVALID_SESSION', 'SESSION_EXPIRED', 'TOO_FAST', 'ALREADY_USED', 'MISSING_CAPTURE']);
 
-function mapCameraError(err: unknown): CameraError {
+export function mapCameraError(err: unknown): CameraError {
   const name = err instanceof DOMException ? err.name : '';
   switch (name) {
     case 'NotAllowedError':
@@ -66,7 +70,7 @@ function mapCameraError(err: unknown): CameraError {
   }
 }
 
-function grabFrame(video: HTMLVideoElement, maxWidth: number, quality: number): Promise<Blob> {
+export function grabFrame(video: HTMLVideoElement, maxWidth: number, quality: number): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const w = Math.min(video.videoWidth, maxWidth);
     const h = Math.round((video.videoHeight / video.videoWidth) * w);
@@ -83,7 +87,7 @@ function grabFrame(video: HTMLVideoElement, maxWidth: number, quality: number): 
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export default function LiveCameraCapture({ onComplete, existingVerificationId }: Props) {
+export default function LiveCameraCapture({ onComplete, existingVerificationId, idCardToken, onIdCardProblem }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const startIdRef = useRef(0);
@@ -337,6 +341,7 @@ export default function LiveCameraCapture({ onComplete, existingVerificationId }
     try {
       const fd = new FormData();
       fd.append('session_token', cap.token);
+      if (idCardToken) fd.append('id_card_token', idCardToken);
       fd.append('capture', new File([cap.blob], 'capture.jpg', { type: 'image/jpeg' }));
       fd.append('frame_1', new File([cap.frame1], 'f1.jpg', { type: 'image/jpeg' }));
       fd.append('frame_2', new File([cap.frame2], 'f2.jpg', { type: 'image/jpeg' }));
@@ -345,6 +350,7 @@ export default function LiveCameraCapture({ onComplete, existingVerificationId }
       const json = await res.json().catch(() => ({}));
 
       if (!res.ok) {
+        if (json.code === 'ID_CARD_MISSING' || json.code === 'ID_CARD_INVALID') { setPhase('captured'); setUploadError({ message: json.error, retake: false }); onIdCardProblem?.(); return; }
         setPhase('captured');
         setUploadError({ message: json.error || 'Upload failed. Please try again.', retake: RETAKE_CODES.has(json.code) });
         return;
@@ -373,7 +379,7 @@ export default function LiveCameraCapture({ onComplete, existingVerificationId }
         </div>
         <div>
           <p className="font-semibold text-gray-900">Photo captured successfully</p>
-          <p className="text-sm text-gray-500 mt-1">Your live photo is stored privately and will be seen only by our verification team.</p>
+          <p className="text-sm text-gray-500 mt-1">Your live selfie is stored privately and will be seen only by our verification team.</p>
         </div>
         {existingVerificationId && (
           <Button variant="outline" onClick={handleRetake} size="sm"><RotateCcw className="w-4 h-4" /> Retake</Button>
