@@ -58,7 +58,7 @@ export default function AdminListingsPage() {
                         </a>
                       ))}
                     </div>
-                    <p className={`mt-1.5 text-xs font-medium ${imgs.length < 3 ? 'text-red-600' : 'text-gray-500'}`}>{imgs.length} photo{imgs.length === 1 ? '' : 's'}{imgs.length < 3 ? ' — fewer than the required 3' : ''}</p>
+                    <p className={`mt-1.5 text-xs font-medium ${imgs.length < 1 ? 'text-red-600' : 'text-gray-500'}`}>{imgs.length} photo{imgs.length === 1 ? '' : 's'}{imgs.length < 1 ? ' — no photo' : ''}</p>
                   </div>
 
                   <div className="min-w-0">

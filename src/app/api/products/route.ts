@@ -123,13 +123,13 @@ export async function POST(request: NextRequest) {
     const data = parsed.data;
 
     const photos = formData.getAll('photos').filter((f): f is File => f instanceof File && f.size > 0);
-    // Photos arrive either pre-uploaded (refs, the normal path) or as files. Either way: 3 to 6, enforced here too.
+    // Photos arrive either pre-uploaded (refs, the normal path) or as files. Either way: PHOTO_MIN to PHOTO_MAX, enforced here too.
     const refs = data.photo_refs ?? [];
     const trusted = (r: string) => (r.startsWith('https://') ? isOwnCloudinaryProductUrl(r) : r.startsWith(`${profile.id}/`) && !r.includes('..'));
     if (refs.some((r) => !trusted(r))) return NextResponse.json({ error: 'One of the photos is not valid. Please upload it again.' }, { status: 400 });
     if (new Set(refs).size !== refs.length) return NextResponse.json({ error: 'The same photo was added twice' }, { status: 400 });
     const photoCount = refs.length + photos.length;
-    if (photoCount < PHOTO_MIN) return NextResponse.json({ error: `Please upload at least ${PHOTO_MIN} photos` }, { status: 400 });
+    if (photoCount < PHOTO_MIN) return NextResponse.json({ error: `Please upload at least ${PHOTO_MIN} photo${PHOTO_MIN === 1 ? '' : 's'}` }, { status: 400 });
     if (photoCount > PHOTO_MAX) return NextResponse.json({ error: `You can upload up to ${PHOTO_MAX} photos` }, { status: 400 });
     let photoError = photos.length ? validateImageFiles(photos, { min: 0, max: PHOTO_MAX, label: 'photos' }) : null;
     // Trust the bytes, not the Content-Type header

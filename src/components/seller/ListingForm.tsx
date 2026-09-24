@@ -74,7 +74,7 @@ export default function ListingForm() {
   // Per-step validation before moving on
   const validate = (s: number): string | null => {
     if (s === 0) {
-      if (photos.length < PHOTO_MIN) return `Add at least ${PHOTO_MIN} photos to continue`;
+      if (photos.length < PHOTO_MIN) return `Add at least ${PHOTO_MIN} photo${PHOTO_MIN === 1 ? '' : 's'} to continue`;
       if (photos.length > PHOTO_MAX) return `You can upload up to ${PHOTO_MAX} photos`;
       if (photos.some((p) => p.status === 'error')) return 'Some photos failed to upload — retry or remove them';
       if (photos.some((p) => p.status !== 'done')) return 'Please wait for your photos to finish uploading';

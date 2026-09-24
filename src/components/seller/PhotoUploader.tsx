@@ -49,7 +49,7 @@ function upload(item: PhotoItem, onProgress: (p: number) => void): Promise<strin
 }
 
 /**
- * Premium photo manager for listings: 3–6 photos, uploaded immediately with progress and retry,
+ * Premium photo manager for listings: 1–3 photos, uploaded immediately with progress and retry,
  * drag to reorder (or use the arrows on touch), first photo = cover.
  */
 export default function PhotoUploader({ items, setItems }: { items: PhotoItem[]; setItems: React.Dispatch<React.SetStateAction<PhotoItem[]>> }) {
@@ -137,7 +137,7 @@ export default function PhotoUploader({ items, setItems }: { items: PhotoItem[];
         >
           <motion.span animate={dragOver ? { y: -6, scale: 1.1 } : { y: 0, scale: 1 }} transition={SPRING.bouncy} className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-green-600 shadow-soft"><Camera className="h-8 w-8" /></motion.span>
           <p className="font-display text-lg font-bold text-ink">{dragOver ? 'Drop to upload' : 'Add product photos'}</p>
-          <p className="mt-1 text-sm font-medium text-ink-soft">Upload {PHOTO_MIN}–{PHOTO_MAX} clear photos</p>
+          <p className="mt-1 text-sm font-medium text-ink-soft">Add 1 photo (up to {PHOTO_MAX}) — more photos help it sell</p>
           <p className="mt-1 max-w-xs text-sm text-ink-muted">Show the product from different angles. JPG, PNG or WebP, up to {MAX_MB} MB each.</p>
           <span className="mt-5 inline-flex items-center gap-2 rounded-full bg-green-600 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_22px_-10px_rgba(22,163,74,0.9)]"><ImagePlus className="h-4 w-4" /> Choose photos</span>
           {input}
@@ -212,7 +212,7 @@ export default function PhotoUploader({ items, setItems }: { items: PhotoItem[];
       {/* Validation */}
       <div aria-live="polite" className="min-h-[24px]">
         {short ? (
-          <p className="flex items-center gap-2 text-sm font-semibold text-amber-700"><AlertCircle className="h-4 w-4 shrink-0" /> {count === 0 ? `Add at least ${PHOTO_MIN} photos to continue` : `Add ${PHOTO_MIN - count} more photo${PHOTO_MIN - count === 1 ? '' : 's'} — at least ${PHOTO_MIN} are needed`}</p>
+          <p className="flex items-center gap-2 text-sm font-semibold text-amber-700"><AlertCircle className="h-4 w-4 shrink-0" /> {count === 0 ? `Add at least ${PHOTO_MIN} photo${PHOTO_MIN === 1 ? '' : 's'} to continue` : `Add ${PHOTO_MIN - count} more photo${PHOTO_MIN - count === 1 ? '' : 's'} — at least ${PHOTO_MIN} ${PHOTO_MIN === 1 ? 'is' : 'are'} needed`}</p>
         ) : failed ? (
           <p className="flex items-center gap-2 text-sm font-semibold text-red-700"><AlertCircle className="h-4 w-4 shrink-0" /> Some photos failed to upload — retry or remove them to continue</p>
         ) : uploading ? (
