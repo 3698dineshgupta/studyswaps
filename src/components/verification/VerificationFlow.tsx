@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ArrowLeft, Book, Camera, Check, Clock, Lock, ShieldCheck, Timer } from 'lucide-react';
+import { ArrowLeft, Check, Clock, Lock, ShieldCheck, Timer } from 'lucide-react';
 import toast from 'react-hot-toast';
 import VerificationStepper from '@/components/verification/VerificationStepper';
 import LiveCameraCapture from '@/components/verification/LiveCameraCapture';
@@ -10,11 +10,9 @@ import IdCardCapture from '@/components/verification/IdCardCapture';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { DURATION, EASE, SPRING } from '@/lib/motion';
-import { cn } from '@/lib/utils';
 
 const STEPS = [
   { label: 'Start' },
-  { label: 'Method' },
   { label: 'ID card' },
   { label: 'Selfie' },
   { label: 'Details' },
@@ -22,11 +20,6 @@ const STEPS = [
   { label: 'Submit' },
 ];
 
-const METHODS = [
-  { id: 'college_id', label: 'College / University ID', description: 'Live photos of your college or university ID card, and of you holding it', icon: Book },
-  { id: 'school_id', label: 'School ID card', description: 'Live photos of your school ID (Pre-K to Secondary), and of you holding it', icon: Book },
-  { id: 'selfie_with_id', label: 'Selfie with student ID', description: 'A live selfie while holding your student ID card', icon: Camera },
-];
 
 export interface VerificationFlowProps {
   defaults?: { full_name?: string; college_name?: string };
@@ -44,7 +37,8 @@ const h2 = 'font-display text-xl font-extrabold text-ink';
 export default function VerificationFlow({ defaults, onSubmitted }: VerificationFlowProps) {
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [method, setMethod] = useState('');
+  // One kind of check for everyone: a live photo of the student ID card, then a selfie holding it (college, university or school ID)
+  const method = 'college_id';
   // Server-issued id of the live capture (never a file or path — the browser can't supply an image)
   const [verificationId, setVerificationId] = useState('');
   // Server-issued token for the live photo of the FRONT of the ID card (step 1 of the two live photos)
@@ -53,8 +47,8 @@ export default function VerificationFlow({ defaults, onSubmitted }: Verification
   const update = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
 
   const handleSubmit = async () => {
-    if (!idCardToken && !verificationId) { toast.error('Please capture the front of your ID card first'); setStep(2); return; }
-    if (!verificationId) { toast.error('Please take your selfie with the ID first'); setStep(3); return; }
+    if (!idCardToken && !verificationId) { toast.error('Please capture the front of your ID card first'); setStep(1); return; }
+    if (!verificationId) { toast.error('Please take your selfie with the ID first'); setStep(2); return; }
     if (!form.full_name || !form.college_name) { toast.error('Please fill all required fields'); return; }
     setLoading(true);
     try {
@@ -62,8 +56,8 @@ export default function VerificationFlow({ defaults, onSubmitted }: Verification
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         // The capture can no longer be used → send the user back to take a new one
-        if (['INVALID_SESSION', 'SESSION_EXPIRED', 'ALREADY_USED', 'LIVENESS_FAILED'].includes(err.code)) { setVerificationId(''); setStep(3); }
-        if (['ID_CARD_MISSING', 'ID_CARD_INVALID'].includes(err.code)) { setVerificationId(''); setIdCardToken(''); setStep(2); }
+        if (['INVALID_SESSION', 'SESSION_EXPIRED', 'ALREADY_USED', 'LIVENESS_FAILED'].includes(err.code)) { setVerificationId(''); setStep(2); }
+        if (['ID_CARD_MISSING', 'ID_CARD_INVALID'].includes(err.code)) { setVerificationId(''); setIdCardToken(''); setStep(1); }
         throw new Error(err.error || 'Submission failed');
       }
       onSubmitted();
@@ -100,74 +94,58 @@ export default function VerificationFlow({ defaults, onSubmitted }: Verification
                   </li>
                 ))}
               </ul>
-              <div className="rounded-xl border border-dashed border-gray-300 p-3.5 text-sm text-ink-soft"><b className="text-ink">Have ready:</b> your student ID card and a device with a camera. You&apos;ll take two live photos: first the front of the ID card, then a selfie holding it.</div>
+              <div className="rounded-xl border border-dashed border-gray-300 p-3.5 text-sm text-ink-soft"><b className="text-ink">Have ready:</b> your student ID card (college, university or school) and a device with a camera. You&apos;ll take two live photos: first the front of the ID card, then a selfie holding it — the camera can take them automatically.</div>
               <Button onClick={() => setStep(1)} fullWidth size="lg">Get started</Button>
             </div>
           )}
 
           {step === 1 && (
-            <div className="space-y-4">
-              <div><h2 className={h2}>Choose a method</h2><p className="mt-1 text-sm text-ink-muted">How would you like to prove you&apos;re a student?</p></div>
-              <div className="space-y-2.5">
-                {METHODS.map((m) => (
-                  <motion.label key={m.id} whileTap={{ scale: 0.99 }} className={cn('flex cursor-pointer items-start gap-3.5 rounded-xl border-2 p-4 transition-colors', method === m.id ? 'border-green-600 bg-green-50' : 'border-gray-200 hover:border-gray-300')}>
-                    <input type="radio" name="method" value={m.id} checked={method === m.id} onChange={(e) => setMethod(e.target.value)} className="mt-1 accent-green-600" />
-                    <m.icon className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
-                    <span><span className="block text-sm font-semibold text-ink">{m.label}</span><span className="text-xs text-ink-muted">{m.description}</span></span>
-                  </motion.label>
-                ))}
-              </div>
-              <div className="flex gap-3">{back(0)}<Button onClick={() => { if (!method) { toast.error('Select a method'); return; } setStep(2); }} className="flex-1" size="lg">Continue</Button></div>
+            <div className="space-y-5">
+              <div><h2 className={h2}>Photograph your student ID</h2><p className="mt-1 text-sm text-ink-muted">Step 1 of 2 — hold the <b>front</b> of your student ID card inside the frame; the photo is taken automatically. Gallery photos are not accepted.</p></div>
+              <IdCardCapture captured={!!idCardToken} onComplete={(t) => { setIdCardToken(t); setVerificationId(''); setStep(2); }} />
+              <div className="flex gap-3">{back(0)}{idCardToken && <Button onClick={() => setStep(2)} className="flex-1" size="lg">Next</Button>}</div>
             </div>
           )}
 
           {step === 2 && (
             <div className="space-y-5">
-              <div><h2 className={h2}>Photograph your ID card</h2><p className="mt-1 text-sm text-ink-muted">Step 1 of 2 — take a live photo of the <b>front</b> of your student ID card. Photos from your gallery are not accepted.</p></div>
-              <IdCardCapture captured={!!idCardToken} onComplete={(t) => { setIdCardToken(t); setVerificationId(''); setStep(3); }} />
-              <div className="flex gap-3">{back(1)}{idCardToken && <Button onClick={() => setStep(3)} className="flex-1" size="lg">Next</Button>}</div>
+              <div><h2 className={h2}>Selfie with your ID card</h2><p className="mt-1 text-sm text-ink-muted">Step 2 of 2 — hold the <b>same ID card</b> next to your face and take a live selfie.</p></div>
+              <LiveCameraCapture key={idCardToken} idCardToken={idCardToken} existingVerificationId={verificationId || undefined} onIdCardProblem={() => { setIdCardToken(''); setStep(1); }} onComplete={(id) => { setVerificationId(id); setStep(3); }} />
+              <div className="flex gap-3">{back(1)}{verificationId && <Button onClick={() => setStep(3)} className="flex-1" size="lg">Next</Button>}</div>
             </div>
           )}
 
           {step === 3 && (
-            <div className="space-y-5">
-              <div><h2 className={h2}>Selfie with your ID card</h2><p className="mt-1 text-sm text-ink-muted">Step 2 of 2 — hold the <b>same ID card</b> next to your face and take a live selfie.</p></div>
-              <LiveCameraCapture key={idCardToken} idCardToken={idCardToken} existingVerificationId={verificationId || undefined} onIdCardProblem={() => { setIdCardToken(''); setStep(2); }} onComplete={(id) => { setVerificationId(id); setStep(4); }} />
-              <div className="flex gap-3">{back(2)}{verificationId && <Button onClick={() => setStep(4)} className="flex-1" size="lg">Next</Button>}</div>
-            </div>
-          )}
-
-          {step === 4 && (
             <div className="space-y-4">
               <h2 className={h2}>Your details</h2>
               <Input label="Full name" placeholder="As shown on your ID" value={form.full_name} onChange={(e) => update('full_name', e.target.value)} required />
               <Input label="Date of birth" type="date" value={form.date_of_birth} onChange={(e) => update('date_of_birth', e.target.value)} />
               <Input label="College / school name" placeholder="XYZ College" value={form.college_name} onChange={(e) => update('college_name', e.target.value)} required />
               <Input label="Student ID / roll number" placeholder="12345" value={form.student_id_number} onChange={(e) => update('student_id_number', e.target.value)} />
-              <div className="flex gap-3">{back(3)}<Button onClick={() => { if (!form.full_name || !form.college_name) { toast.error('Fill the required fields'); return; } setStep(5); }} className="flex-1" size="lg">Next</Button></div>
+              <div className="flex gap-3">{back(2)}<Button onClick={() => { if (!form.full_name || !form.college_name) { toast.error('Fill the required fields'); return; } setStep(4); }} className="flex-1" size="lg">Next</Button></div>
+            </div>
+          )}
+
+          {step === 4 && (
+            <div className="space-y-4">
+              <div><h2 className={h2}>Review</h2><p className="mt-1 text-sm text-ink-muted">Make sure everything is correct.</p></div>
+              <dl className="space-y-2.5 rounded-xl bg-gray-50 p-4 text-sm">
+                {[['Name', form.full_name], ['Date of birth', form.date_of_birth || '—'], ['College / school', form.college_name], ['Student ID no.', form.student_id_number || '—'], ['ID card (front)', idCardToken || verificationId ? 'Captured ✓' : 'Missing'], ['Selfie with ID', verificationId ? 'Captured ✓' : 'Missing']].map(([k, v]) => (
+                  <div key={k} className="flex justify-between gap-4"><dt className="text-ink-muted">{k}</dt><dd className="text-right font-semibold text-ink">{v}</dd></div>
+                ))}
+              </dl>
+              <div className="flex gap-3">{back(3)}<Button onClick={() => { if (!idCardToken && !verificationId) { toast.error('Please capture the front of your ID card first'); setStep(1); return; } if (!verificationId) { toast.error('Please take your selfie with the ID first'); setStep(2); return; } setStep(5); }} className="flex-1" size="lg">Looks good</Button></div>
             </div>
           )}
 
           {step === 5 && (
-            <div className="space-y-4">
-              <div><h2 className={h2}>Review</h2><p className="mt-1 text-sm text-ink-muted">Make sure everything is correct.</p></div>
-              <dl className="space-y-2.5 rounded-xl bg-gray-50 p-4 text-sm">
-                {[['Name', form.full_name], ['Date of birth', form.date_of_birth || '—'], ['College / school', form.college_name], ['Student ID no.', form.student_id_number || '—'], ['Method', METHODS.find((m) => m.id === method)?.label || method], ['ID card (front)', idCardToken || verificationId ? 'Captured ✓' : 'Missing'], ['Selfie with ID', verificationId ? 'Captured ✓' : 'Missing']].map(([k, v]) => (
-                  <div key={k} className="flex justify-between gap-4"><dt className="text-ink-muted">{k}</dt><dd className="text-right font-semibold text-ink">{v}</dd></div>
-                ))}
-              </dl>
-              <div className="flex gap-3">{back(4)}<Button onClick={() => { if (!idCardToken && !verificationId) { toast.error('Please capture the front of your ID card first'); setStep(2); return; } if (!verificationId) { toast.error('Please take your selfie with the ID first'); setStep(3); return; } setStep(6); }} className="flex-1" size="lg">Looks good</Button></div>
-            </div>
-          )}
-
-          {step === 6 && (
             <div className="space-y-5">
               <h2 className={h2}>Submit for review</h2>
               <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">By submitting, you confirm the details are accurate and belong to you. False information may lead to account suspension.</div>
               <ul className="space-y-2 text-sm text-ink-soft">
                 {['Your ID card and selfie are stored privately and reviewed only by our verification team.', 'Review typically takes up to 24 hours.', 'You will get a notification once you are verified.'].map((t) => <li key={t} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-green-600" strokeWidth={3} />{t}</li>)}
               </ul>
-              <div className="flex gap-3">{back(5)}<Button onClick={handleSubmit} loading={loading} className="flex-1" size="lg">Submit verification</Button></div>
+              <div className="flex gap-3">{back(4)}<Button onClick={handleSubmit} loading={loading} className="flex-1" size="lg">Submit verification</Button></div>
             </div>
           )}
         </motion.div>

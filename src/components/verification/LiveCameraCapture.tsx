@@ -16,6 +16,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AlertTriangle, Camera, CheckCircle, Loader2, Lock, RotateCcw } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import { AUTO, Steady, checkCard, motion, skinShare, toGray, visibleRegion } from '@/lib/autoCapture';
 
 type Phase = 'idle' | 'starting' | 'live' | 'challenge' | 'straighten' | 'captured' | 'uploading' | 'done' | 'error';
 
@@ -95,6 +96,7 @@ export default function LiveCameraCapture({ onComplete, existingVerificationId, 
   const previewUrlRef = useRef<string | null>(null);
   const captureRef = useRef<{ blob: Blob; frame1: Blob; frame2: Blob; token: string } | null>(null);
   const cancelledRef = useRef(false);
+  const autoRef = useRef<() => void>(() => {});
 
   const [phase, setPhase] = useState<Phase>(existingVerificationId ? 'done' : 'idle');
   const [error, setError] = useState<CameraError | null>(null);
@@ -102,6 +104,7 @@ export default function LiveCameraCapture({ onComplete, existingVerificationId, 
   const [prompt, setPrompt] = useState<{ text: string; seconds: number } | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<{ message: string; retake: boolean } | null>(null);
+  const [autoProgress, setAutoProgress] = useState(0);
 
   /* ---------------- camera lifecycle ---------------- */
 
@@ -123,62 +126,75 @@ export default function LiveCameraCapture({ onComplete, existingVerificationId, 
   const startAnalysis = useCallback(() => {
     if (analysisRef.current) clearInterval(analysisRef.current);
     const canvas = document.createElement('canvas');
-    canvas.width = 160;
-    canvas.height = 120;
+    canvas.width = AUTO.W;
+    canvas.height = AUTO.H;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    // Optional browser face detection (Shape Detection API) — not available everywhere
+    // Optional browser face detection (Shape Detection API) — not available everywhere; skin-colour check is the fallback
     /* eslint-disable @typescript-eslint/no-explicit-any */
     const FaceDetectorCtor = (window as any).FaceDetector;
     const detector = FaceDetectorCtor ? new FaceDetectorCtor({ fastMode: true, maxDetectedFaces: 1 }) : null;
-    let busy = false;
+    setAutoProgress(0);
+    const steady = new Steady(6);
+    let prev: Float32Array | null = null;
+    let busy = false, fired = false, tick = 0;
+    let faces: any[] | null = null;
 
+    // Looks at the live picture 4 times a second. When the face is in the oval and the ID card lies in its frame, in focus and
+    // steady for about a second and a half, the capture starts by itself. The Capture button stays available the whole time.
     analysisRef.current = setInterval(async () => {
       const v = videoRef.current;
-      if (busy || !ctx || !v || v.readyState < 2 || !v.videoWidth) return;
+      if (busy || fired || !ctx || !v || v.readyState < 2 || !v.videoWidth) return;
       busy = true;
       try {
-        ctx.drawImage(v, 0, 0, 160, 120);
-        const { data } = ctx.getImageData(0, 0, 160, 120);
-        const gray = new Float32Array(160 * 120);
+        const boxW = v.clientWidth || 3, boxH = v.clientHeight || 4;
+        const { sx, sy, sw, sh } = visibleRegion(v.videoWidth, v.videoHeight, boxW, boxH);
+        ctx.drawImage(v, sx, sy, sw, sh, 0, 0, AUTO.W, AUTO.H);
+        const img = ctx.getImageData(0, 0, AUTO.W, AUTO.H);
+        const gray = toGray(img.data, AUTO.W * AUTO.H);
         let sum = 0;
-        for (let i = 0; i < gray.length; i++) {
-          const g = 0.299 * data[i * 4] + 0.587 * data[i * 4 + 1] + 0.114 * data[i * 4 + 2];
-          gray[i] = g;
-          sum += g;
-        }
-        const brightness = sum / gray.length;
+        for (let i = 0; i < gray.length; i += 7) sum += gray[i];
+        const brightness = sum / Math.ceil(gray.length / 7);
 
-        // Sharpness (variance of the Laplacian) inside the Student-ID guide area
-        let n = 0, lapSum = 0, lapSq = 0;
-        for (let y = 48; y < 88; y++) {
-          for (let x = 84; x < 154; x++) {
-            const i = y * 160 + x;
-            const lap = 4 * gray[i] - gray[i - 1] - gray[i + 1] - gray[i - 160] - gray[i + 160];
-            lapSum += lap; lapSq += lap * lap; n++;
+        // The on-screen guides are in screen fractions and the screen is mirrored, so flip x to get camera coordinates
+        const cardFrac = 0.38, cardH = ((cardFrac * boxW) / 1.586 / boxH) * AUTO.H;
+        const card = { x: (1 - 0.96) * AUTO.W, y: 0.42 * AUTO.H, w: cardFrac * AUTO.W, h: cardH };
+        const oval = { x: (1 - 0.56) * AUTO.W, y: 0.1 * AUTO.H, w: 0.5 * AUTO.W, h: 0.68 * AUTO.H };
+        const c = checkCard(gray, AUTO.W, AUTO.H, card);
+        const cardOk = c.sides >= 2 && c.detail >= 0.05 && c.sharpness >= 60 && c.glare <= 0.12;
+
+        let faceOk = false;
+        if (detector) {
+          if (tick++ % 2 === 0) faces = await detector.detect(v).catch(() => null);
+          const f = faces?.[0]?.boundingBox;
+          if (f) {
+            const cx = (f.x + f.width / 2 - sx) / sw, cy = (f.y + f.height / 2 - sy) / sh;
+            faceOk = f.width / sw >= 0.16 && Math.abs(cx - 0.69) < 0.2 && Math.abs(cy - 0.44) < 0.25;
           }
+        } else {
+          faceOk = skinShare(img.data, AUTO.W, AUTO.H, oval) >= 0.25;
         }
-        const sharpness = lapSq / n - (lapSum / n) ** 2;
 
-        let message = 'Show your Student ID clearly';
+        const still = motion(prev, gray, AUTO.W, { x: 0, y: 0.1 * AUTO.H, w: AUTO.W, h: 0.8 * AUTO.H }) < 7;
+        prev = gray;
+
+        let message = 'Show your face and Student ID clearly';
         if (brightness < 55) message = 'Too dark — move to a brighter spot';
         else if (brightness > 210) message = 'Too bright — avoid strong light behind you';
-        else if (detector) {
-          const faces = await detector.detect(v).catch(() => null);
-          if (faces) {
-            const f = faces[0]?.boundingBox;
-            if (!f) message = 'Center your face';
-            else if (f.width / v.videoWidth < 0.16) message = 'Move closer';
-            else if (Math.abs(f.x + f.width / 2 - v.videoWidth * 0.32) > v.videoWidth * 0.2) message = 'Center your face';
-            else if (sharpness < 40) message = 'Make sure the ID text is readable';
-          }
-        } else if (sharpness < 40) {
-          message = 'Make sure the ID text is readable';
-        }
+        else if (!faceOk) message = 'Put your face inside the oval';
+        else if (c.sides < 2) message = 'Hold your ID inside the green frame';
+        else if (!cardOk) message = 'Make sure the ID text is readable';
+        else if (!still) message = 'Hold steady…';
+        else message = 'Perfect — hold still…';
         setHint(message);
+
+        const good = brightness >= 55 && brightness <= 210 && faceOk && cardOk && still;
+        const hit = steady.push(good);
+        setAutoProgress(steady.progress);
+        if (hit) { fired = true; autoRef.current(); }
       } finally {
         busy = false;
       }
-    }, 700);
+    }, AUTO.tickMs);
   }, []);
 
   const startCamera = useCallback(async () => {
@@ -325,6 +341,8 @@ export default function LiveCameraCapture({ onComplete, existingVerificationId, 
     }
   };
 
+  autoRef.current = handleCapture;
+
   const handleRetake = () => {
     clearPreview(); // discard the old capture
     startCamera();
@@ -408,6 +426,7 @@ export default function LiveCameraCapture({ onComplete, existingVerificationId, 
               <div className="absolute left-[6%] top-[10%] w-[50%] h-[68%] rounded-[50%] border-[3px] border-dashed border-white/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.25)]" />
               <span className="absolute left-[6%] top-[3%] w-[50%] text-center text-[11px] font-semibold text-white drop-shadow">Your face</span>
               <div className="absolute right-[4%] top-[42%] w-[38%] aspect-[1.586] rounded-lg border-[3px] border-dashed border-green-300 bg-green-300/10" />
+              {phase === 'live' && <div className="absolute inset-x-6 bottom-3 h-1.5 overflow-hidden rounded-full bg-white/25"><div className="h-full rounded-full bg-green-400 transition-[width] duration-200" style={{ width: `${Math.round(autoProgress * 100)}%` }} /></div>}
               <span className="absolute right-[4%] top-[35%] w-[38%] text-center text-[11px] font-semibold text-green-200 drop-shadow">Student ID</span>
             </div>
           )}
@@ -469,7 +488,7 @@ export default function LiveCameraCapture({ onComplete, existingVerificationId, 
         {phase === 'live' && (
           <div className="mt-3 space-y-1 text-center">
             <p className="text-sm font-semibold text-green-700" aria-live="polite">{hint}</p>
-            <p className="text-xs text-gray-500">Make sure your face and all ID text are clearly visible.</p>
+            <p className="text-xs text-gray-500">The selfie starts by itself once your face and ID are in place and steady — or tap the button yourself.</p>
           </div>
         )}
         {phase === 'captured' && !uploadError && (

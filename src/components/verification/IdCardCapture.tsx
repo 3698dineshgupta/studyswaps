@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AlertTriangle, Camera, CheckCircle, Loader2, Lock, RotateCcw } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { grabFrame, mapCameraError } from '@/components/verification/LiveCameraCapture';
+import { AUTO, Steady, checkCard, motion, toGray, visibleRegion } from '@/lib/autoCapture';
 
 type Phase = 'idle' | 'starting' | 'live' | 'captured' | 'uploading' | 'done' | 'error';
 
@@ -27,11 +28,14 @@ export default function IdCardCapture({ onComplete, captured }: Props) {
   const blobRef = useRef<Blob | null>(null);
   const previewRef = useRef<string | null>(null);
   const cancelledRef = useRef(false);
+  const autoRef = useRef<() => void>(() => {});
 
   const [phase, setPhase] = useState<Phase>(captured ? 'done' : 'idle');
   const [error, setError] = useState<ReturnType<typeof mapCameraError> | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  // Auto-capture: what the live picture looks like right now, and how close we are to taking the photo
+  const [guide, setGuide] = useState<{ text: string; ok: boolean; progress: number }>({ text: 'Fit the FRONT of your ID card inside the frame', ok: false, progress: 0 });
 
   const stopCamera = useCallback(() => {
     startIdRef.current++;
@@ -121,6 +125,44 @@ export default function IdCardCapture({ onComplete, captured }: Props) {
     }
   };
 
+  autoRef.current = handleCapture;
+
+  // Look at the live picture a few times a second. When the card has lain inside the frame, in focus and steady, for about
+  // a second, take the photo by ourselves. The Capture button stays available the whole time.
+  useEffect(() => {
+    if (phase !== 'live') return;
+    const canvas = document.createElement('canvas');
+    canvas.width = AUTO.W; canvas.height = AUTO.H;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return;
+    const frame = { x: AUTO.W * 0.09, y: (AUTO.H - (AUTO.W * 0.82) / 1.586) / 2, w: AUTO.W * 0.82, h: (AUTO.W * 0.82) / 1.586 };
+    const steady = new Steady();
+    let prev: Float32Array | null = null;
+    let fired = false;
+    const id = setInterval(() => {
+      const v = videoRef.current;
+      if (fired || !v || v.readyState < 2 || !v.videoWidth) return;
+      const { sx, sy, sw, sh } = visibleRegion(v.videoWidth, v.videoHeight, v.clientWidth || 4, v.clientHeight || 3);
+      ctx.drawImage(v, sx, sy, sw, sh, 0, 0, AUTO.W, AUTO.H);
+      const gray = toGray(ctx.getImageData(0, 0, AUTO.W, AUTO.H).data, AUTO.W * AUTO.H);
+      const r = checkCard(gray, AUTO.W, AUTO.H, frame);
+      const still = motion(prev, gray, AUTO.W, frame) < 6;
+      prev = gray;
+      let text = 'Fit the FRONT of your ID card inside the frame';
+      if (r.brightness < 50) text = 'Too dark — move to a brighter place';
+      else if (r.glare > 0.12) text = 'Too much glare — tilt the card slightly';
+      else if (r.sides < 3) text = 'Line the card edges up with the frame';
+      else if (r.sharpness < 90 || r.detail < 0.05) text = 'Move a little closer / hold still so the text is sharp';
+      else if (!still) text = 'Hold steady…';
+      else text = 'Perfect — hold still…';
+      const good = r.ok && still;
+      const hit = steady.push(good);
+      setGuide((g) => (g.text === text && g.ok === good && Math.abs(g.progress - steady.progress) < 0.01 ? g : { text, ok: good, progress: steady.progress }));
+      if (hit) { fired = true; autoRef.current(); }
+    }, AUTO.tickMs);
+    return () => clearInterval(id);
+  }, [phase]);
+
   const handleUse = async () => {
     if (!blobRef.current) return;
     setUploadError(null);
@@ -163,8 +205,9 @@ export default function IdCardCapture({ onComplete, captured }: Props) {
 
           {phase === 'live' && (
             <div className="pointer-events-none absolute inset-0">
-              <div className="absolute left-1/2 top-1/2 aspect-[1.586] w-[82%] -translate-x-1/2 -translate-y-1/2 rounded-xl border-[3px] border-dashed border-green-300 shadow-[0_0_0_9999px_rgba(0,0,0,0.35)]" />
-              <span className="absolute inset-x-0 top-[6%] text-center text-xs font-semibold text-white drop-shadow">Fit the FRONT of your ID card inside the frame</span>
+              <div className={`absolute left-1/2 top-1/2 aspect-[1.586] w-[82%] -translate-x-1/2 -translate-y-1/2 rounded-xl border-[3px] shadow-[0_0_0_9999px_rgba(0,0,0,0.35)] transition-colors ${guide.ok ? 'border-solid border-green-400' : 'border-dashed border-white/80'}`} />
+              <span className="absolute inset-x-4 bottom-7 mx-auto w-fit max-w-full rounded-full bg-black/60 px-3 py-1 text-center text-xs font-semibold text-white">{guide.text}</span>
+              <div className="absolute inset-x-6 bottom-3 h-1.5 overflow-hidden rounded-full bg-white/25"><div className="h-full rounded-full bg-green-400 transition-[width] duration-200" style={{ width: `${Math.round(guide.progress * 100)}%` }} /></div>
               <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1 text-xs font-medium text-white"><span className="h-2 w-2 animate-pulse rounded-full bg-green-400" /> Camera ready</div>
             </div>
           )}
@@ -192,7 +235,7 @@ export default function IdCardCapture({ onComplete, captured }: Props) {
           )}
         </div>
 
-        {phase === 'live' && <p className="mt-3 text-center text-xs text-gray-500">Place the card flat, in good light, with no glare. All text and your photo must be readable.</p>}
+        {phase === 'live' && <p className="mt-3 text-center text-xs text-gray-500">The photo is taken automatically when your card is lined up and steady — or tap the button yourself. Use good light, no glare.</p>}
         {phase === 'captured' && !uploadError && <p className="mt-3 text-center text-sm font-semibold text-green-700">Can you read every word on the card? If not, retake it.</p>}
         {uploadError && <div role="alert" className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{uploadError}</div>}
       </div>
