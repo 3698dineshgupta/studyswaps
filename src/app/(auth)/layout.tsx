@@ -1,8 +1,12 @@
 import { ReactNode } from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { BrandMark, Wordmark } from '@/components/brand/Logo';
 import AuthShowcase from '@/components/auth/AuthShowcase';
 import { APP_NAME } from '@/lib/constants';
+
+// Sign-in pages have no search value; noindex (not a robots.txt block) so Google can actually read the tag
+export const metadata: Metadata = { robots: { index: false, follow: true } };
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (

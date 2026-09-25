@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import { BadgeCheck, Eye, LockKeyhole, MapPin, Star } from 'lucide-react';
 import { RevealGroup, RevealItem } from '@/components/ui/Reveal';
@@ -32,6 +33,9 @@ export default function TrustSection() {
           </RevealItem>
         ))}
       </RevealGroup>
+      <p className="mt-6 text-center text-sm">
+        <Link href="/how-it-works" className="font-semibold text-green-700 underline-offset-2 hover:underline">How StudySwaps works</Link>
+      </p>
     </section>
   );
 }

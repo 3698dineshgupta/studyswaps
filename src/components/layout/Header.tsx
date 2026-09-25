@@ -117,7 +117,7 @@ export function Header() {
       )}
     >
       <div className="page-container">
-        <div className="flex h-16 items-center gap-3 lg:h-[68px]">
+        <div className="flex h-16 items-center gap-2 min-[380px]:gap-3 lg:h-[68px]">
           {/* Logo */}
           <Link href="/" className="flex shrink-0 items-center gap-2.5" aria-label="StudySwaps home">
             <motion.span whileHover={{ rotate: -6, scale: 1.06 }} transition={SPRING.bouncy} className="flex">
@@ -205,7 +205,7 @@ export function Header() {
               </div>
             ) : (
               <div className="ml-1 flex shrink-0 items-center gap-1.5">
-                <Link href="/login" className="shrink-0 whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-semibold text-ink-soft transition-colors hover:bg-gray-100 hover:text-ink">Log in</Link>
+                <Link href="/login" className="shrink-0 whitespace-nowrap rounded-full px-2.5 py-2 min-[380px]:px-3.5 text-sm font-semibold text-ink-soft transition-colors hover:bg-gray-100 hover:text-ink">Log in</Link>
                 <Link href="/register" className="hidden shrink-0 whitespace-nowrap rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-ink shadow-sm transition-all hover:border-gray-300 hover:shadow-soft sm:block">Sign up</Link>
               </div>
             )}

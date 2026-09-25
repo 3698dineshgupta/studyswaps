@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { Providers } from '@/components/layout/Providers'
-import { APP_NAME, APP_TAGLINE } from '@/lib/constants'
+import { APP_NAME, SITE_URL } from '@/lib/constants'
+import { SITE_DESCRIPTION } from '@/lib/seo'
 import { AuthProvider } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/server'
 import type { Profile } from '@/types'
@@ -21,16 +22,17 @@ const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600', '700'], 
 const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['500', '600', '700', '800'], display: 'swap', variable: '--font-jakarta' })
 
 export const metadata: Metadata = {
+  // Makes every relative canonical / OG URL absolute on the real domain (canonicals are set per page, not globally)
+  metadataBase: new URL(SITE_URL),
   title: {
     default: APP_NAME,
     template: `%s | ${APP_NAME}`,
   },
-  description: APP_TAGLINE,
-  keywords: ['student marketplace', 'second hand', 'buy sell', 'student', 'Nepal'],
+  description: SITE_DESCRIPTION,
   authors: [{ name: APP_NAME }],
   openGraph: {
     title: APP_NAME,
-    description: APP_TAGLINE,
+    description: SITE_DESCRIPTION,
     siteName: APP_NAME,
     type: 'website',
     locale: 'en_NP',

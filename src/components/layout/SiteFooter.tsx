@@ -1,10 +1,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { APP_NAME } from '@/lib/constants'
+import { footerLandingLinks } from '@/lib/landing'
 
 const GROUPS: { title: string; links: [string, string][] }[] = [
   { title: 'Marketplace', links: [['Browse', '/browse'], ['Sell an item', '/sell'], ['Get verified', '/verify']] },
-  { title: 'How it works', links: [['Delivery & fees', '/policies#delivery'], ['Payments', '/policies#payments'], ['Seller payouts', '/policies#payouts']] },
+  { title: 'Browse by city', links: footerLandingLinks() },
+  { title: 'How it works', links: [['How StudySwaps works', '/how-it-works'], ['Delivery & fees', '/policies#delivery'], ['Payments', '/policies#payments'], ['Seller payouts', '/policies#payouts']] },
   { title: 'Policies', links: [['Terms of use', '/policies#terms'], ['Privacy policy', '/policies#privacy'], ['Refunds & returns', '/policies#refunds'], ['Prohibited items', '/policies#prohibited']] },
 ]
 
@@ -13,7 +15,7 @@ export default function SiteFooter() {
   return (
     <footer className="mt-10 border-t border-gray-200/70 bg-white/60">
       <div className="page-container py-10">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(4,1fr)]">
           <div>
             <Image src="/brand/logo-full.png" alt={APP_NAME} width={1045} height={683} className="h-24 w-auto -ml-1" />
             <p className="mt-2 max-w-xs text-sm leading-relaxed text-ink-muted">Buy and sell with verified students. We collect and deliver — buyer and seller never have to meet.</p>

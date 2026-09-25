@@ -14,8 +14,18 @@ import SectionHeading from '@/components/home/SectionHeading';
 import SellCta from '@/components/home/SellCta';
 import TrustSection from '@/components/home/TrustSection';
 import { APP_NAME } from '@/lib/constants';
+import { DEFAULT_SHARE_IMAGE, HOME_TITLE, SITE_DESCRIPTION } from '@/lib/seo';
+import JsonLd from '@/components/seo/JsonLd';
+import { organizationJsonLd, websiteJsonLd } from '@/lib/jsonld';
 
-export const metadata: Metadata = { title: `${APP_NAME} — Buy & sell with verified students` };
+// `absolute` skips the layout's "%s | StudySwaps" template, which would print the brand twice
+export const metadata: Metadata = {
+  title: { absolute: HOME_TITLE },
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: '/' },
+  openGraph: { title: HOME_TITLE, description: SITE_DESCRIPTION, url: '/', siteName: APP_NAME, type: 'website', locale: 'en_NP', images: [DEFAULT_SHARE_IMAGE] },
+  twitter: { card: 'summary_large_image', title: HOME_TITLE, description: SITE_DESCRIPTION, images: [DEFAULT_SHARE_IMAGE.url] },
+};
 // Listings change often and depend on RLS/session; never cache this page
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +62,8 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd data={organizationJsonLd()} />
+      <JsonLd data={websiteJsonLd()} />
       <Header />
       <main className="pb-24 lg:pb-0">
         {/* Hero — animated orbiting-marketplace scene (see components/hero) */}

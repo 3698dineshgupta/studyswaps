@@ -9,13 +9,22 @@ import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import SiteFooter from '@/components/layout/SiteFooter'
 import { APP_NAME } from '@/lib/constants'
+import { DEFAULT_SHARE_IMAGE } from '@/lib/seo'
 import { DELIVERY, PLATFORM_FEE, SELLER_COMMISSION_RATE, WITHDRAWAL } from '@/lib/pricing'
 import { SERVICE_CITIES } from '@/lib/delivery'
 import { formatPrice } from '@/lib/utils'
 
+const description = 'How StudySwaps works: terms of use, delivery, fees, payments, seller payouts, refunds, prohibited items and privacy.'
+const SHARE_TITLE = `Policies & terms | ${APP_NAME}`
+
 export const metadata: Metadata = {
-  title: `Policies & terms — ${APP_NAME}`,
-  description: 'How StudySwaps works: terms of use, delivery, fees, payments, seller payouts, refunds, prohibited items and privacy.',
+  // The layout's title template already appends the brand
+  title: 'Policies & terms',
+  alternates: { canonical: '/policies' },
+  description,
+  // A page-level openGraph replaces the layout's, so the site name, locale and default share image are repeated here
+  openGraph: { title: SHARE_TITLE, description, url: '/policies', siteName: APP_NAME, type: 'website', locale: 'en_NP', images: [DEFAULT_SHARE_IMAGE] },
+  twitter: { card: 'summary_large_image', title: SHARE_TITLE, description, images: [DEFAULT_SHARE_IMAGE.url] },
 }
 
 const EFFECTIVE = '20 September 2026'
@@ -314,7 +323,8 @@ export default function PoliciesPage() {
         </section>
 
         <div className="page-container grid gap-8 py-8 lg:grid-cols-[250px_1fr] lg:py-12">
-          <nav aria-label="Policy sections" className="lg:sticky lg:top-32 lg:self-start">
+          {/* min-w-0: a grid item defaults to min-width:auto, so without it the chip strip below widens the whole page instead of scrolling inside its own box */}
+          <nav aria-label="Policy sections" className="min-w-0 lg:sticky lg:top-32 lg:self-start">
             <p className="mb-2 hidden text-xs font-bold uppercase tracking-wider text-ink-muted lg:block">On this page</p>
             <ul className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:px-0">
               {SECTIONS.map(({ id, title, Icon }) => (

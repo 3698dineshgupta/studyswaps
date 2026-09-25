@@ -4,6 +4,13 @@
 
 export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'StudySwaps'
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+// Canonical public origin for canonical tags, robots.txt and the sitemap. A production build must never advertise
+// localhost or the *.vercel.app alias, so those fall back to the real domain.
+const ENV_URL = (process.env.NEXT_PUBLIC_APP_URL || '').replace(/\/+$/, '')
+export const SITE_URL =
+  ENV_URL && !/localhost|127\.0\.0\.1|vercel\.app/.test(ENV_URL)
+    ? ENV_URL
+    : process.env.NODE_ENV === 'production' ? 'https://studyswaps.com' : ENV_URL || 'http://localhost:3000'
 export const APP_TAGLINE = 'Buy • Sell • Reuse • Study'
 
 export const PLATFORM_FEE_PERCENT = 0 // 0% for now (student friendly)
