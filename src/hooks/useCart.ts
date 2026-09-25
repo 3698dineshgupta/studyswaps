@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { useRouter, usePathname } from 'next/navigation';
 
 async function fetchCart() {
   const res = await fetch('/api/cart');
@@ -15,8 +16,9 @@ async function addToCart(productId: string, quantity = 1) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ productId, quantity }),
   });
+  if (res.status === 401) throw new Error('LOGIN_REQUIRED');
   if (!res.ok) {
-    const err = await res.json();
+    const err = await res.json().catch(() => ({}));
     throw new Error(err.error || 'Failed to add to cart');
   }
   return res.json();
@@ -34,6 +36,8 @@ async function removeFromCart(itemId: string) {
 
 export function useCart() {
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const { data: cart, isLoading } = useQuery({
     queryKey: ['cart'],
@@ -47,7 +51,10 @@ export function useCart() {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
       toast.success('Added to cart');
     },
-    onError: (err: Error) => toast.error(err.message),
+    onError: (err: Error) => {
+      if (err.message === 'LOGIN_REQUIRED') { toast('Log in to continue'); router.push(`/login?redirectTo=${encodeURIComponent(pathname || '/')}`); return; }
+      toast.error(err.message);
+    },
   });
 
   const removeMutation = useMutation({

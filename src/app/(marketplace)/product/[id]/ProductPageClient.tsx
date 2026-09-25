@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { motion, useReducedMotion } from 'motion/react';
 import toast from 'react-hot-toast';
@@ -13,6 +13,7 @@ import { useProduct, useProducts } from '@/hooks/useProducts';
 import { useCart } from '@/hooks/useCart';
 import { useCartControls } from '@/hooks/useCartItem';
 import { useWishlist } from '@/hooks/useWishlist';
+import { useAuthState } from '@/components/auth/AuthProvider';
 import ProductGrid from '@/components/marketplace/ProductGrid';
 import type { CardProduct } from '@/components/marketplace/ProductCard';
 import ProductGallery, { type GalleryHandle } from '@/components/product/ProductGallery';
@@ -72,6 +73,8 @@ function Description({ text }: { text: string }) {
 
 function ProductView({ product, id }: { product: any; id: string }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const { isLoggedIn } = useAuthState();
   const reduced = useReducedMotion();
   const gallery = useRef<GalleryHandle>(null);
   const { isWishlisted, toggle } = useWishlist();
@@ -141,6 +144,8 @@ function ProductView({ product, id }: { product: any; id: string }) {
   };
 
   const onBuyNow = () => {
+    // Not signed in: send them to log in (and bring them back here) instead of a raw "Unauthorized" error
+    if (!isLoggedIn) { toast('Log in to buy this item'); router.push(`/login?redirectTo=${encodeURIComponent(pathname || `/product/${id}`)}`); return; }
     if (inCart > 0) { router.push('/checkout'); return; }
     addToCart({ productId: product.id }, { onSuccess: () => router.push('/checkout'), onError: (e: Error) => { if (/already/i.test(e.message)) router.push('/checkout'); } });
   };
