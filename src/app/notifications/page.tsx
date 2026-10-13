@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'motion/react';
-import { BadgeCheck, Bell, CheckCheck, CreditCard, MessageCircle, Package, Star, Tag, Truck, Wallet, type LucideIcon } from 'lucide-react';
+import { BadgeCheck, Bell, CheckCheck, CreditCard, Handshake, MessageCircle, Package, Star, Tag, Truck, Wallet, type LucideIcon } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import MobileNav from '@/components/layout/MobileNav';
 import EmptyState from '@/components/ui/EmptyState';
@@ -27,6 +27,7 @@ const ICONS: Record<string, { Icon: LucideIcon; tint: string }> = {
   WITHDRAWAL_UPDATE: { Icon: Wallet, tint: 'bg-teal-100 text-teal-700' },
   LISTING_STATUS: { Icon: Tag, tint: 'bg-rose-100 text-rose-700' },
   REVIEW_RECEIVED: { Icon: Star, tint: 'bg-yellow-100 text-yellow-700' },
+  OFFER_UPDATE: { Icon: Handshake, tint: 'bg-violet-100 text-violet-700' },
 };
 const iconFor = (type: string) => ICONS[type] ?? { Icon: Bell, tint: 'bg-gray-100 text-gray-600' };
 

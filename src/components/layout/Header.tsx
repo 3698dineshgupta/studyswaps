@@ -102,6 +102,8 @@ export function Header() {
     // Admins get the control panel right in their account menu; nobody else ever sees this item
     ...(isAdmin ? [{ href: '/admin', label: 'Admin panel', Icon: ShieldCheck, admin: true }] : []),
     { href: '/profile', label: 'My Profile', Icon: User },
+    // The bell in the header is desktop-only (hidden on phones), so this is the only way to reach notifications on mobile
+    { href: '/notifications', label: 'Notifications', Icon: Bell, count: notifCount },
     { href: '/orders', label: 'My Orders', Icon: Package },
     { href: '/offers', label: 'Offers', Icon: Handshake },
     { href: '/wishlist', label: 'Wishlist', Icon: Heart },
@@ -188,9 +190,10 @@ export function Header() {
                           <div className="mt-1"><VerifiedBadge status={profile.verification_status} size="sm" /></div>
                         </div>
                         <nav className="py-1">
-                          {menuLinks.map((item) => { const { href, label, Icon } = item; const adminItem = 'admin' in item; return (
+                          {menuLinks.map((item) => { const { href, label, Icon } = item; const adminItem = 'admin' in item; const badge = 'count' in item ? item.count : 0; return (
                             <Link key={href} href={href} role="menuitem" onClick={() => setMenuOpen(false)} className={cn('group flex items-center gap-3 px-4 py-2.5 text-sm transition-colors', adminItem ? 'mx-1.5 my-1 rounded-xl bg-green-50 font-semibold text-green-800 hover:bg-green-100' : 'text-ink-soft hover:bg-gray-50 hover:text-ink')}>
                               <Icon className={cn('h-4 w-4 transition-transform group-hover:scale-110', adminItem ? 'text-green-700' : 'text-gray-400 group-hover:text-green-600')} /> {label}
+                              {!!badge && <span className="ml-auto flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-green-600 px-1 text-[10px] font-bold text-white">{badge > 9 ? '9+' : badge}</span>}
                             </Link>
                           ) })}
                         </nav>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { motion } from 'motion/react';
 import toast from 'react-hot-toast';
 import { Tag } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
@@ -74,14 +75,18 @@ export default function MakeOfferTrigger({ productId, sellerId, price }: { produ
 
   return (
     <>
-      <button
+      <motion.button
         type="button"
         onClick={openModal}
         disabled={sent}
-        className="inline-flex items-center gap-1.5 rounded-full border border-green-300 bg-white px-3 py-1 text-xs font-semibold text-green-700 transition-colors hover:bg-green-50 disabled:cursor-default disabled:opacity-80"
+        whileHover={sent ? undefined : { y: -1 }}
+        whileTap={sent ? undefined : { scale: 0.96 }}
+        animate={sent ? undefined : { boxShadow: ['0 0 0 0 rgba(22,163,74,0.35)', '0 0 0 6px rgba(22,163,74,0)', '0 0 0 0 rgba(22,163,74,0)'] }}
+        transition={sent ? undefined : { boxShadow: { duration: 2.2, repeat: Infinity, repeatDelay: 1.2 } }}
+        className="inline-flex items-center gap-1.5 rounded-full bg-green-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-[0_6px_16px_-6px_rgba(22,163,74,0.7)] transition-colors hover:bg-green-700 disabled:cursor-default disabled:bg-green-100 disabled:text-green-700 disabled:shadow-none"
       >
         <Tag className="h-3.5 w-3.5" /> {sent ? 'Offer sent ✓' : 'Make an offer'}
-      </button>
+      </motion.button>
 
       <Modal isOpen={open} onClose={() => setOpen(false)} title="Make an offer" size="sm">
         <div className="space-y-4">
