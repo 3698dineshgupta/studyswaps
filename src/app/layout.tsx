@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/server'
 import type { Profile } from '@/types'
 import { getFastUser } from '@/lib/auth/session'
 import { cached } from '@/lib/cache'
-import { Inter, Plus_Jakarta_Sans } from 'next/font/google'
+import localFont from 'next/font/local'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { CityProvider } from '@/components/city/CityProvider'
 import NavigationProgress from '@/components/layout/NavigationProgress'
@@ -18,9 +18,11 @@ import { cityFromCookie } from '@/lib/city'
 import { cityFromText } from '@/lib/cities'
 import TelegramConnectPrompt from '@/components/notifications/TelegramConnectPrompt'
 
-// Fonts are self-hosted at build time (no render-blocking request to Google) and only the weights we use are shipped
-const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600', '700'], display: 'swap', variable: '--font-inter' })
-const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['500', '600', '700', '800'], display: 'swap', variable: '--font-jakarta' })
+// Font files are committed under ./fonts (latin-subset variable woff2, pulled once from Google Fonts) and loaded
+// locally instead of via next/font/google, so the build never depends on a live fetch to fonts.googleapis.com —
+// that fetch started failing intermittently on Vercel's build network after the Next.js 15 upgrade.
+const inter = localFont({ src: './fonts/inter-variable.woff2', weight: '400 700', display: 'swap', variable: '--font-inter' })
+const jakarta = localFont({ src: './fonts/jakarta-variable.woff2', weight: '500 800', display: 'swap', variable: '--font-jakarta' })
 
 export const metadata: Metadata = {
   // Makes every relative canonical / OG URL absolute on the real domain (canonicals are set per page, not globally)
