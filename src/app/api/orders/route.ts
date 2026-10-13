@@ -8,6 +8,7 @@ import { verifyPlace } from '@/lib/geo';
 import { getOrigin, quoteFor } from '@/lib/geoQuote';
 import { rateLimit, LIMITS } from '@/lib/security/rateLimit';
 import { TelegramService } from '@/lib/telegram/service';
+import { startEsewaPaymentForOrder } from '@/lib/esewa/initiate';
 
 const createOrderSchema = z.object({
   delivery: z.object({
@@ -211,29 +212,35 @@ export async function POST(request: NextRequest) {
     // The negotiated offer is spent: it can't be used to start a second order
     if (offer) await admin.from('offers').update({ status: 'FULFILLED', order_id: order.id }).eq('id', offer.id).eq('status', 'ACCEPTED');
 
-    const { data: deliveryRow } = await admin
-      .from('deliveries')
-      .insert({ order_id: order.id, current_status: 'CREATED' })
-      .select('id')
-      .single();
+    // Sign the eSewa form now, in this same request — the checkout page used to make a SECOND round trip
+    // (POST /api/payments/esewa/initiate) just for this, which is most of why "Pay with eSewa" felt slow.
+    // Everything it needs is already known (no extra read): the order id/number plus the pricing computed above.
+    const payment = await startEsewaPaymentForOrder(admin, {
+      id: order.id,
+      order_number: order.order_number,
+      subtotal: pricing.subtotal,
+      delivery_charge: pricing.deliveryFee,
+      platform_fee: pricing.platformFee,
+      total: pricing.total,
+    });
 
-    if (deliveryRow) {
-      await admin.from('delivery_events').insert({
-        delivery_id: deliveryRow.id,
-        status: 'CREATED',
-        description: 'Order placed',
-        actor_id: profile.id,
-        actor_type: 'buyer',
-      });
-    }
+    // Nothing past this point affects what the browser is about to do (submit the eSewa form and leave the
+    // site), so it runs in the background instead of making the buyer wait: the delivery timeline row, and
+    // closing out this buyer's other abandoned unpaid orders so they don't pile up.
+    void (async () => {
+      const { data: deliveryRow } = await admin.from('deliveries').insert({ order_id: order.id, current_status: 'CREATED' }).select('id').single();
+      if (deliveryRow) {
+        await admin.from('delivery_events').insert({ delivery_id: deliveryRow.id, status: 'CREATED', description: 'Order placed', actor_id: profile.id, actor_type: 'buyer' });
+      }
 
-    // The cart is NOT emptied here. It is emptied only when the payment is confirmed, so if the buyer cancels on
-    // eSewa (or closes the tab) their items are still in the cart. Older unpaid attempts are closed so they don't pile up.
-    const { data: stale } = await admin.from('orders').update({ status: 'CANCELLED' }).eq('buyer_id', profile.id).in('status', ['CREATED', 'PAYMENT_PENDING']).neq('id', order.id).select('id');
-    if (stale?.length) {
-      await admin.from('payments').update({ status: 'FAILED' }).in('order_id', stale.map((o) => o.id)).eq('status', 'PENDING');
-      await admin.from('deliveries').update({ current_status: 'CANCELLED' }).in('order_id', stale.map((o) => o.id));
-    }
+      // The cart is NOT emptied here. It is emptied only when the payment is confirmed, so if the buyer cancels on
+      // eSewa (or closes the tab) their items are still in the cart. Older unpaid attempts are closed so they don't pile up.
+      const { data: stale } = await admin.from('orders').update({ status: 'CANCELLED' }).eq('buyer_id', profile.id).in('status', ['CREATED', 'PAYMENT_PENDING']).neq('id', order.id).select('id');
+      if (stale?.length) {
+        await admin.from('payments').update({ status: 'FAILED' }).in('order_id', stale.map((o) => o.id)).eq('status', 'PENDING');
+        await admin.from('deliveries').update({ current_status: 'CANCELLED' }).in('order_id', stale.map((o) => o.id));
+      }
+    })().catch((e) => console.error('[API] Orders POST background cleanup failed:', e instanceof Error ? e.message : e));
 
     // Ops heads-up: an order was placed (it is only PAID once eSewa confirms — that sends its own alert)
     TelegramService.sendAdminNotification(`NEW ORDER (awaiting payment)
@@ -249,6 +256,7 @@ Delivery: ${pricing.distanceKm} km`).catch(() => {});
         order_number: order.order_number,
         requires_payment: true,
         pricing,
+        payment,
       },
       { status: 201 }
     );

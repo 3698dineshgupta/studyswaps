@@ -13,7 +13,7 @@ import AnimatedNumber from '@/components/ui/AnimatedNumber';
 import DeliveryStep, { type QuoteState } from '@/components/checkout/DeliveryStep';
 import CheckoutProgress from '@/components/checkout/CheckoutProgress';
 import { formatPrice } from '@/lib/utils';
-import { startEsewaPayment } from '@/lib/esewa/client';
+import { startEsewaPayment, submitEsewaForm } from '@/lib/esewa/client';
 import { PLATFORM_FEE, DELIVERY } from '@/lib/pricing';
 import { describeDelivery, initialDelivery, validateDelivery, type DeliverySelection } from '@/lib/delivery';
 
@@ -87,8 +87,11 @@ export default function CheckoutPage() {
       const data = await res.json();
 
       try {
-        await startEsewaPayment(data.order_id); // navigates the browser to eSewa
-        return;
+        // The order was just created with its signed eSewa payload already attached — no second round trip.
+        // (Falls back to asking for it separately only if that's ever missing, so this can't become a dead end.)
+        if (data.payment) submitEsewaForm(data.payment);
+        else await startEsewaPayment(data.order_id);
+        return; // navigates the browser to eSewa
       } catch (payErr) {
         toast.error((payErr as Error).message);
         router.push(`/orders/${data.order_id}`);

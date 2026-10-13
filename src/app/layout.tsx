@@ -16,6 +16,7 @@ import WebVitals from '@/components/layout/WebVitals'
 import { Suspense } from 'react'
 import { cityFromCookie } from '@/lib/city'
 import { cityFromText } from '@/lib/cities'
+import TelegramConnectPrompt from '@/components/notifications/TelegramConnectPrompt'
 
 // Fonts are self-hosted at build time (no render-blocking request to Google) and only the weights we use are shipped
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600', '700'], display: 'swap', variable: '--font-inter' })
@@ -87,7 +88,7 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${jakarta.variable}`}>
       <body className="min-h-screen bg-canvas antialiased">
         <Providers>
-          <Suspense fallback={null}><NavigationProgress /></Suspense><WebVitals /><AuthProvider initialProfile={profile} initialIsAdmin={isAdmin}><CityProvider initialCity={cityFromCookie() ?? cityFromText(profile?.location)}>{children}</CityProvider></AuthProvider></Providers>
+          <Suspense fallback={null}><NavigationProgress /></Suspense><WebVitals /><AuthProvider initialProfile={profile} initialIsAdmin={isAdmin}><CityProvider initialCity={cityFromCookie() ?? cityFromText(profile?.location)}>{children}<TelegramConnectPrompt /></CityProvider></AuthProvider></Providers>
       </body>
     </html>
   )
