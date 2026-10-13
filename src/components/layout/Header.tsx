@@ -5,7 +5,7 @@ import { Suspense, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'motion/react'
 import {
-  Bell, Search, ChevronDown, LogOut, Heart,
+  Bell, Search, ChevronDown, LogOut, Heart, Handshake,
   Package, LayoutDashboard, Shield, ShieldCheck, User, Plus, X,
 } from 'lucide-react'
 import { getSupabase } from '@/lib/supabase/lazy'
@@ -103,6 +103,7 @@ export function Header() {
     ...(isAdmin ? [{ href: '/admin', label: 'Admin panel', Icon: ShieldCheck, admin: true }] : []),
     { href: '/profile', label: 'My Profile', Icon: User },
     { href: '/orders', label: 'My Orders', Icon: Package },
+    { href: '/offers', label: 'Offers', Icon: Handshake },
     { href: '/wishlist', label: 'Wishlist', Icon: Heart },
     { href: '/dashboard', label: 'Seller Dashboard', Icon: LayoutDashboard },
     // Buyers never need this; it only appears for accounts that want to (or already tried to) sell

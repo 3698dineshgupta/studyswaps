@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { z } from 'zod';
 import { getFastUser } from '@/lib/auth/session';
 import { rateLimit, LIMITS } from '@/lib/security/rateLimit';
@@ -30,10 +31,10 @@ export async function GET() {
 
     // ONE query. Row-level security already limits cart_items to the caller's own cart, so there is no need to look
     // up the profile and the cart first (that was three sequential round trips before).
-    const { data: items, error } = await supabase
+    const cartSelect = (withOfferId: boolean) => supabase
       .from('cart_items')
       .select(`
-        id, quantity, added_at,
+        id, quantity, added_at${withOfferId ? ', offer_id' : ''},
         products(
           id, title, price, original_price, condition, status, location, quantity,
           profiles!products_seller_id_fkey(full_name, verification_status),
@@ -42,17 +43,44 @@ export async function GET() {
       `)
       .order('added_at', { ascending: false });
 
+    let { data: items, error } = await cartSelect(true);
+    // Negotiated offers need `supabase/run-014-offers-and-telegram-link.sql` run once; until then, fall back to
+    // the plain cart so a pending migration never takes the whole cart down for every buyer.
+    if (error?.code === '42703') ({ data: items, error } = await cartSelect(false));
     if (error) throw error;
 
     // Filter out items where product is no longer available
     // (`product` alias: the client reads item.product, PostgREST names it `products`)
     /* eslint-disable @typescript-eslint/no-explicit-any */
-    const activeItems = ((items || []) as any[])
+    let withProducts = ((items || []) as any[])
       .map((item) => ({
         ...item,
         product: item.products && { ...item.products, seller: item.products.profiles },
       }))
       .filter((item) => item.product?.status === 'ACTIVE');
+
+    // A handful of cart items (rarely) carry a negotiated price from an accepted offer: substitute the agreed
+    // amount for the listing price. An offer that is no longer ACCEPTED (expired, fulfilled elsewhere) is removed
+    // from the cart here — self-healing, the same way the wallet releases what's due whenever it's opened.
+    const offerIds = withProducts.map((i) => i.offer_id).filter(Boolean);
+    if (offerIds.length) {
+      const admin = createAdminClient();
+      const { data: offers } = await admin.from('offers').select('id, status, amount, expires_at').in('id', offerIds);
+      const byId = new Map((offers ?? []).map((o) => [o.id, o]));
+      const stale: string[] = [];
+      withProducts = withProducts.filter((item) => {
+        if (!item.offer_id) return true;
+        const offer = byId.get(item.offer_id);
+        const valid = offer?.status === 'ACCEPTED' && offer.expires_at && new Date(offer.expires_at).getTime() > Date.now();
+        if (!valid) { stale.push(item.id); return false; }
+        item.product = { ...item.product, price: Number(offer!.amount) };
+        item.negotiated = true;
+        return true;
+      });
+      if (stale.length) await admin.from('cart_items').delete().in('id', stale);
+    }
+
+    const activeItems = withProducts;
 
     const total = activeItems.reduce(
       (sum: number, item: any) => sum + (Number(item.product?.price) || 0) * item.quantity,

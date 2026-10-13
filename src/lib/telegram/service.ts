@@ -240,6 +240,11 @@ export async function sendAdminNotification(message: string): Promise<TelegramRe
   return sendTelegramMessage(ADMIN_CHAT_ID, message)
 }
 
+/** A personal DM to one buyer or seller who has linked their own Telegram account (see lib/telegram/link.ts). */
+export async function sendDirectMessage(chatId: string | number, text: string): Promise<TelegramResult> {
+  return sendTelegramMessage(String(chatId), text)
+}
+
 export async function sendPaymentAlert(params: {
   orderNumber: string
   buyerName: string
@@ -357,6 +362,7 @@ export const TelegramService = {
   archiveVerification,
   archiveListing,
   sendAdminNotification,
+  sendDirectMessage,
   sendPaymentAlert,
   sendSecurityAlert,
   retryFailedSyncJobs,

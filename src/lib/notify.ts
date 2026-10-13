@@ -4,10 +4,14 @@
  */
 import { createAdminClient } from '@/lib/supabase/admin'
 import { renderEmail, sendEmail } from '@/lib/email'
+import { TelegramService } from '@/lib/telegram/service'
+import { SITE_URL } from '@/lib/constants'
 
 export type NotificationType =
   | 'VERIFICATION_STATUS' | 'ORDER_UPDATE' | 'PAYMENT_UPDATE' | 'DELIVERY_UPDATE' | 'NEW_MESSAGE'
-  | 'WITHDRAWAL_UPDATE' | 'DISPUTE_UPDATE' | 'LISTING_STATUS' | 'REVIEW_RECEIVED' | 'SYSTEM'
+  | 'WITHDRAWAL_UPDATE' | 'DISPUTE_UPDATE' | 'LISTING_STATUS' | 'REVIEW_RECEIVED' | 'OFFER_UPDATE' | 'SYSTEM'
+
+const absolute = (path?: string) => (path ? (/^https?:\/\//.test(path) ? path : `${SITE_URL}${path.startsWith('/') ? '' : '/'}${path}`) : null)
 
 export async function notify(profileId: string, n: { type: NotificationType; title: string; body: string; actionUrl?: string; data?: Record<string, unknown>; /** also send this as an email */ email?: { subject?: string; cta?: string } }) {
   try {
@@ -20,8 +24,21 @@ export async function notify(profileId: string, n: { type: NotificationType; tit
       action_url: n.actionUrl ?? null,
       data: n.data ?? null,
     })
+
+    // `telegram_chat_id` needs `supabase/run-014-offers-and-telegram-link.sql` run once; until then this falls back
+    // to the plain profile lookup, so a pending migration can never silently stop existing emails from going out.
+    let { data: p, error: pError } = await db.from('profiles').select('full_name, auth_user_id, telegram_chat_id').eq('id', profileId).maybeSingle()
+    if (pError?.code === '42703') ({ data: p } = await db.from('profiles').select('full_name, auth_user_id').eq('id', profileId).maybeSingle())
+
+    // Telegram: sent whenever this person has linked their own account — a free extra channel on every notification,
+    // not just the ones that opt into email. Never blocks or throws; a failed send is logged by TelegramService itself.
+    if (p && 'telegram_chat_id' in p && p.telegram_chat_id) {
+      const link = absolute(n.actionUrl)
+      const text = `${n.title}\n\n${n.body}${link ? `\n\n${link}` : ''}`
+      TelegramService.sendDirectMessage(p.telegram_chat_id, text).catch(() => {})
+    }
+
     if (n.email) {
-      const { data: p } = await db.from('profiles').select('full_name, auth_user_id').eq('id', profileId).maybeSingle()
       const { data: u } = p ? await db.auth.admin.getUserById(p.auth_user_id) : { data: null }
       const to = u?.user?.email
       if (to) {

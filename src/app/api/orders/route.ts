@@ -21,6 +21,8 @@ const createOrderSchema = z.object({
     full_name: z.string().trim().min(1).max(100),
     phone: z.string().trim().min(7).max(20),
   }),
+  // Set only when buying at a negotiated price (an ACCEPTED offer) — bypasses the cart for that one item
+  offer_id: z.string().uuid().optional(),
 });
 
 async function getBuyerProfile() {
@@ -93,21 +95,41 @@ export async function POST(request: NextRequest) {
     }
     const place = input.delivery.place;
 
-    const { data: cart } = await supabase
-      .from('carts')
-      .select('id')
-      .eq('profile_id', profile.id)
-      .maybeSingle();
-
-    const { data: cartItems } = cart
-      ? await supabase
-          .from('cart_items')
-          .select('id, quantity, products(id, title, condition, price, status, seller_id, location, quantity)')
-          .eq('cart_id', cart.id)
-      : { data: null };
-
     /* eslint-disable @typescript-eslint/no-explicit-any */
-    const lines = (cartItems ?? []).map((ci: any) => ({ ...ci, product: ci.products }));
+    const admin = createAdminClient();
+    let lines: any[];
+    let offer: { id: string } | null = null;
+
+    if (input.offer_id) {
+      // Buying at a negotiated price: a single item, priced from the offer — never from the browser. The cart
+      // is not touched (a cart item may or may not exist for it; it is cleared on payment, same as any other item).
+      const { data: o } = await admin.from('offers').select('id, product_id, buyer_id, seller_id, amount, status, expires_at').eq('id', input.offer_id).maybeSingle();
+      if (!o || o.buyer_id !== profile.id) return NextResponse.json({ error: 'Offer not found' }, { status: 404 });
+      if (o.status !== 'ACCEPTED') return NextResponse.json({ error: 'This offer is not accepted' }, { status: 409 });
+      if (!o.expires_at || new Date(o.expires_at).getTime() < Date.now()) return NextResponse.json({ error: 'This offer has expired' }, { status: 409 });
+
+      const { data: product } = await admin.from('products').select('id, title, condition, price, status, seller_id, location, quantity').eq('id', o.product_id).maybeSingle();
+      if (!product || product.status !== 'ACTIVE' || product.seller_id !== o.seller_id) {
+        return NextResponse.json({ error: 'This item is no longer available' }, { status: 409 });
+      }
+      offer = { id: o.id };
+      lines = [{ quantity: 1, product: { ...product, price: o.amount } }];
+    } else {
+      const { data: cart } = await supabase
+        .from('carts')
+        .select('id')
+        .eq('profile_id', profile.id)
+        .maybeSingle();
+
+      const { data: cartItems } = cart
+        ? await supabase
+            .from('cart_items')
+            .select('id, quantity, products(id, title, condition, price, status, seller_id, location, quantity)')
+            .eq('cart_id', cart.id)
+        : { data: null };
+
+      lines = (cartItems ?? []).map((ci: any) => ({ ...ci, product: ci.products }));
+    }
 
     if (lines.length === 0) {
       return NextResponse.json({ error: 'Your cart is empty' }, { status: 400 });
@@ -135,7 +157,6 @@ export async function POST(request: NextRequest) {
 
     // Every amount is computed here, never taken from the browser
     const subtotal = lines.reduce((sum: number, l: any) => sum + Number(l.product.price) * l.quantity, 0);
-    const admin = createAdminClient();
     const origin = await getOrigin(admin, lines[0].product.id, lines[0].product.location);
     const quote = quoteFor(subtotal, origin, place);
     if (!quote.ok) return NextResponse.json({ error: quote.error }, { status: 422 });
@@ -186,6 +207,9 @@ export async function POST(request: NextRequest) {
       await admin.from('orders').delete().eq('id', order.id);
       throw itemsError;
     }
+
+    // The negotiated offer is spent: it can't be used to start a second order
+    if (offer) await admin.from('offers').update({ status: 'FULFILLED', order_id: order.id }).eq('id', offer.id).eq('status', 'ACCEPTED');
 
     const { data: deliveryRow } = await admin
       .from('deliveries')

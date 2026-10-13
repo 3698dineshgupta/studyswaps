@@ -17,6 +17,7 @@ import { useAuthState } from '@/components/auth/AuthProvider';
 import ProductGrid from '@/components/marketplace/ProductGrid';
 import type { CardProduct } from '@/components/marketplace/ProductCard';
 import ProductGallery, { type GalleryHandle } from '@/components/product/ProductGallery';
+import MakeOfferTrigger from '@/components/product/MakeOfferTrigger';
 import CartIconLink from '@/components/cart/CartIconLink';
 import { useCartUI } from '@/components/cart/CartUIProvider';
 import Avatar from '@/components/ui/Avatar';
@@ -214,6 +215,9 @@ function ProductView({ product, id }: { product: any; id: string }) {
             <div className="flex flex-wrap items-center gap-3">
               <Price value={Number(product.price)} original={product.original_price} size="xl" showDiscount />
               {product.negotiable && <span className="rounded-full bg-violet-100 px-2.5 py-1 text-xs font-semibold text-violet-700">Negotiable</span>}
+              {product.negotiable && !sold && (
+                <MakeOfferTrigger productId={product.id} sellerId={product.seller_id} price={Number(product.price)} />
+              )}
             </div>
             {seller?.seller_rating > 0 && <Rating value={seller.seller_rating} count={seller.seller_review_count} size="md" />}
           </motion.div>

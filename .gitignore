@@ -62,3 +62,4 @@ service-account*.json
 # Demo-data scripts (contain a demo login) and build caches — keep local
 scripts/seed*.mjs
 tsconfig.tsbuildinfo
+supabase/.temp/

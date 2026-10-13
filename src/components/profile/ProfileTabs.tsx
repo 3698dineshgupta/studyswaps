@@ -1,26 +1,40 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion } from 'motion/react';
 import Tabs from '@/components/ui/Tabs';
 import ProductGrid from '@/components/marketplace/ProductGrid';
 import type { CardProduct } from '@/components/marketplace/ProductCard';
 import EmptyState from '@/components/ui/EmptyState';
 import Rating from '@/components/ui/Rating';
+import TelegramConnect from '@/components/profile/TelegramConnect';
 import { ORDER_STATUS_LABELS } from '@/lib/constants';
 import { DURATION, EASE } from '@/lib/motion';
 import { formatDate, formatPrice } from '@/lib/utils';
 
-type TabId = 'listings' | 'orders' | 'reviews' | 'saved';
+type TabId = 'listings' | 'orders' | 'reviews' | 'saved' | 'notifications';
+const TAB_IDS: TabId[] = ['listings', 'orders', 'reviews', 'saved', 'notifications'];
 
 interface OrderRow { id: string; order_number: string; status: string; total: number; created_at: string; title: string }
 interface ReviewRow { id: string; rating: number; title: string | null; content: string | null; created_at: string }
 
 interface Props { listings: CardProduct[]; orders: OrderRow[]; reviews: ReviewRow[]; saved: CardProduct[] }
 
-export default function ProfileTabs({ listings, orders, reviews, saved }: Props) {
-  const [tab, setTab] = useState<TabId>('listings');
+export default function ProfileTabs(props: Props) {
+  return (
+    <Suspense fallback={null}>
+      <ProfileTabsInner {...props} />
+    </Suspense>
+  );
+}
+
+function ProfileTabsInner({ listings, orders, reviews, saved }: Props) {
+  const searchParams = useSearchParams();
+  const requested = searchParams.get('tab');
+  const initialTab = (requested && TAB_IDS.includes(requested as TabId)) ? (requested as TabId) : 'listings';
+  const [tab, setTab] = useState<TabId>(initialTab);
 
   return (
     <div>
@@ -32,6 +46,7 @@ export default function ProfileTabs({ listings, orders, reviews, saved }: Props)
           { id: 'orders', label: 'Orders', count: orders.length },
           { id: 'reviews', label: 'Reviews', count: reviews.length },
           { id: 'saved', label: 'Saved', count: saved.length },
+          { id: 'notifications', label: 'Notifications' },
         ]}
       />
 
@@ -73,6 +88,12 @@ export default function ProfileTabs({ listings, orders, reviews, saved }: Props)
           ) : <EmptyState illustration="productCard" title="No reviews yet" text="Reviews from buyers appear here after your first completed sale." />)}
 
           {tab === 'saved' && (saved.length ? <ProductGrid products={saved} /> : <EmptyState illustration="productCard" title="Your wishlist is waiting." text="Save products you want to keep an eye on." action={{ label: 'Explore Marketplace', href: '/browse' }} />)}
+
+          {tab === 'notifications' && (
+            <div className="card max-w-lg p-5 sm:p-6">
+              <TelegramConnect />
+            </div>
+          )}
         </motion.div>
       </AnimatePresence>
     </div>
