@@ -8,7 +8,7 @@ Posture: **improved, not "unhackable"**. Nothing here is a guarantee; the remain
 USER (browser: fully untrusted)
   │  HTTPS                                             ← TB1: everything the browser sends can be forged
   ▼
-Next.js 14 (middleware: CSP nonce, CSRF origin check, IP throttle, session refresh, /admin gate)
+Next.js 15 (middleware: CSP nonce, CSRF origin check, IP throttle, session refresh, /admin gate)
   │
   ├─ Route handlers /api/*  (validate → authenticate → authorize → act with the service role)
   │      ↳ rate limit (memory or Redis) · zod schemas · audit log · security log
@@ -110,7 +110,7 @@ Use three Supabase projects: **development**, **staging**, **production**. Run `
 
 | # | What | Why | Risk | Recommended fix |
 |---|---|---|---|---|
-| R1 | Next.js 14.x still lists DoS-class advisories fixed only in 15/16 (image optimizer `remotePatterns`, RSC deserialization DoS, rewrites smuggling — we use no rewrites) | 14.2.35 is the last 14.x | Availability, not data theft | Plan an upgrade to Next 15/16 LTS; WAF request-size limits meanwhile |
+| R1 | ~~Next.js 14.x DoS-class advisories~~ — **Resolved 2026-10-13**: upgraded to Next.js 15.5.27 (see `SECURITY_AUDIT.md` F1), which also closed two critical unauthenticated-RCE advisories (Image Optimizer AVIF handling; Windows-hosted RCE) that were out of scope when this row was written | — | — | Closed |
 | R2 | In-memory rate limiting is per instance | Multiple instances each keep their own counters | Limits are looser than stated when scaled out | Set `REDIS_URL` (docker-compose provides it) and/or Cloudflare rate limits |
 | R3 | Session cookie is readable by JS | `@supabase/ssr` browser client design | Token theft if XSS is ever found | Nonce-CSP is in place; optional: move to server-only cookie auth (`@supabase/ssr` ≥0.5 API) |
 | R4 | Register endpoint reveals whether an email exists | Supabase behaviour | Account enumeration | Enable CAPTCHA + confirmation emails; generic messaging if you turn confirmation ON |

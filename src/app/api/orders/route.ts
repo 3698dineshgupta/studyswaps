@@ -224,21 +224,21 @@ export async function POST(request: NextRequest) {
       total: pricing.total,
     });
 
+    // The cart is NOT emptied here. It is emptied only when the payment is confirmed, so if the buyer cancels on
+    // eSewa (or closes the tab) their items are still in the cart. Older unpaid attempts are closed so they don't
+    // pile up — this is awaited (not backgrounded): callers rely on it having happened by the time this responds.
+    const { data: stale } = await admin.from('orders').update({ status: 'CANCELLED' }).eq('buyer_id', profile.id).in('status', ['CREATED', 'PAYMENT_PENDING']).neq('id', order.id).select('id');
+    if (stale?.length) {
+      await admin.from('payments').update({ status: 'FAILED' }).in('order_id', stale.map((o) => o.id)).eq('status', 'PENDING');
+      await admin.from('deliveries').update({ current_status: 'CANCELLED' }).in('order_id', stale.map((o) => o.id));
+    }
+
     // Nothing past this point affects what the browser is about to do (submit the eSewa form and leave the
-    // site), so it runs in the background instead of making the buyer wait: the delivery timeline row, and
-    // closing out this buyer's other abandoned unpaid orders so they don't pile up.
+    // site), so it runs in the background instead of making the buyer wait: just the delivery timeline row.
     void (async () => {
       const { data: deliveryRow } = await admin.from('deliveries').insert({ order_id: order.id, current_status: 'CREATED' }).select('id').single();
       if (deliveryRow) {
         await admin.from('delivery_events').insert({ delivery_id: deliveryRow.id, status: 'CREATED', description: 'Order placed', actor_id: profile.id, actor_type: 'buyer' });
-      }
-
-      // The cart is NOT emptied here. It is emptied only when the payment is confirmed, so if the buyer cancels on
-      // eSewa (or closes the tab) their items are still in the cart. Older unpaid attempts are closed so they don't pile up.
-      const { data: stale } = await admin.from('orders').update({ status: 'CANCELLED' }).eq('buyer_id', profile.id).in('status', ['CREATED', 'PAYMENT_PENDING']).neq('id', order.id).select('id');
-      if (stale?.length) {
-        await admin.from('payments').update({ status: 'FAILED' }).in('order_id', stale.map((o) => o.id)).eq('status', 'PENDING');
-        await admin.from('deliveries').update({ current_status: 'CANCELLED' }).in('order_id', stale.map((o) => o.id));
       }
     })().catch((e) => console.error('[API] Orders POST background cleanup failed:', e instanceof Error ? e.message : e));
 

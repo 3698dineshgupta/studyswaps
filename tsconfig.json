@@ -25,7 +25,8 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "target": "ES2017"
   },
   "include": [
     "next-env.d.ts",
@@ -35,7 +36,8 @@
     ".next-sec/types/**/*.ts",
     ".next-prod/types/**/*.ts",
     ".next-perf/types/**/*.ts",
-    ".next-perf2/types/**/*.ts"
+    ".next-perf2/types/**/*.ts",
+    ".next-secrun/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

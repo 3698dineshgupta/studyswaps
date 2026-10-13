@@ -14,12 +14,9 @@ const initiateSchema = z.object({
 // is mainly for "Pay now" on an order the buyer comes back to after cancelling or leaving eSewa).
 export async function POST(request: NextRequest) {
   try {
-    // Parse first: no point spending a round trip on auth/DB for a malformed request
-    const parsed = initiateSchema.safeParse(await request.json().catch(() => null));
-    if (!parsed.success) {
-      return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
-    }
-
+    // Auth first, always: an unauthenticated or rate-limited caller must see the same refusal no matter what
+    // they put in the body (an endpoint that reveals "your input was malformed" before checking who's asking
+    // tells an anonymous caller something about validity for free — small, but needless).
     const supabase = await createServerClient();
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -27,6 +24,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     { const limited = await rateLimit(request, LIMITS.payment, user.id); if (limited) return limited; }
+
+    const parsed = initiateSchema.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
+    }
 
     // Profile and order are independent lookups (both only need the signed-in session) — one round trip, not two
     const [{ data: profile }, { data: order }] = await Promise.all([

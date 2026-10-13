@@ -10,7 +10,7 @@ import SellerVerificationGate from '@/components/verification/SellerVerification
 export const metadata: Metadata = { title: 'Sell — StudySwaps' };
 
 export default async function SellPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login?redirectTo=/sell');

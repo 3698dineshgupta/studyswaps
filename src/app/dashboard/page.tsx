@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
 
 // NOTE: the layout already renders the site header, dashboard tabs and mobile nav.
 export default async function DashboardPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login?redirectTo=/dashboard');
 

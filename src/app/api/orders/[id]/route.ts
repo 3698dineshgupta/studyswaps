@@ -9,10 +9,11 @@ import { getFastUser } from '@/lib/auth/session';
 // GET /api/orders/[id]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!z.string().uuid().safeParse(params.id).success) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    const { id } = await params;
+    if (!z.string().uuid().safeParse(id).success) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     const supabase = await createServerClient();
 
     const user = await getFastUser(supabase);
@@ -24,7 +25,7 @@ export async function GET(
     // ONE query. The database hides address columns from browsers, so the server reads the order itself, and only
     // hands it over after checking the (locally verified) caller is the buyer or the seller of THIS order.
     const admin = createAdminClient();
-    const { data: order, error } = await admin.from('orders').select(ORDER_SELECT).eq('id', params.id).maybeSingle();
+    const { data: order, error } = await admin.from('orders').select(ORDER_SELECT).eq('id', id).maybeSingle();
 
     // Same answer for "doesn't exist" and "not yours" so order IDs can't be probed
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

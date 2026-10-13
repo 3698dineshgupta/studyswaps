@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { TelegramService } from '@/lib/telegram/service';
-import { webhookSecretToken } from '@/lib/telegram/link';
+import { verifyWebhookSecretToken } from '@/lib/telegram/link';
+import { rateLimit, LIMITS } from '@/lib/security/rateLimit';
 
 /**
  * POST /api/telegram/webhook — Telegram calls this for every update sent to the bot.
@@ -12,9 +13,15 @@ import { webhookSecretToken } from '@/lib/telegram/link';
  */
 export async function POST(request: NextRequest) {
   try {
-    // Telegram echoes back the `secret_token` set at registration — reject anything that doesn't have it,
-    // so a stranger who finds this URL can't forge chat ids onto other people's accounts.
-    if (request.headers.get('x-telegram-bot-api-secret-token') !== webhookSecretToken()) {
+    // Defense in depth: even though a caller needs the secret token below to get anywhere, cap how often
+    // this URL can be hit at all (no signed-in user here, so by IP — same as the login endpoint's IP limit).
+    const limited = await rateLimit(request, LIMITS.telegramWebhook);
+    if (limited) return limited;
+
+    // Telegram echoes back the `secret_token` set at registration — reject anything that doesn't have it (in
+    // constant time, so the secret itself can't be inferred one byte at a time from response timing), so a
+    // stranger who finds this URL can't forge chat ids onto other people's accounts.
+    if (!verifyWebhookSecretToken(request.headers.get('x-telegram-bot-api-secret-token'))) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

@@ -5,8 +5,9 @@ import { rateLimit, LIMITS } from '@/lib/security/rateLimit';
 
 // POST /api/offers/:id/cart — add the product from an ACCEPTED, unexpired offer to the buyer's cart at the
 // agreed price. GET /api/cart (and checkout) read that price straight from the offer, never from the browser.
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const supabase = await createServerClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -17,7 +18,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     if (profile.account_status !== 'ACTIVE') return NextResponse.json({ error: 'Your account is not active' }, { status: 403 });
 
-    const { data: offer } = await admin.from('offers').select('id, product_id, buyer_id, status, expires_at, amount').eq('id', params.id).maybeSingle();
+    const { data: offer } = await admin.from('offers').select('id, product_id, buyer_id, status, expires_at, amount').eq('id', id).maybeSingle();
     if (!offer || offer.buyer_id !== profile.id) return NextResponse.json({ error: 'Offer not found' }, { status: 404 });
     if (offer.status !== 'ACCEPTED') return NextResponse.json({ error: 'This offer is not accepted' }, { status: 409 });
     if (!offer.expires_at || new Date(offer.expires_at).getTime() < Date.now()) return NextResponse.json({ error: 'This offer has expired' }, { status: 409 });

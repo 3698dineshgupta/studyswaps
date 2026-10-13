@@ -20,10 +20,11 @@ const idSchema = z.string().uuid();
 // GET /api/products/[id]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!idSchema.safeParse(params.id).success) return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    const { id } = await params;
+    if (!idSchema.safeParse(id).success) return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     const supabase = await createServerClient();
 
     const { data: product, error } = await supabase
@@ -39,7 +40,7 @@ export async function GET(
         product_images(id, storage_path, is_primary, sort_order),
         categories(id, name, slug)
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (error || !product) {
@@ -68,7 +69,7 @@ export async function GET(
     supabase
       .from('products')
       .update({ view_count: (product.view_count || 0) + 1 })
-      .eq('id', params.id)
+      .eq('id', id)
       .then(() => {});
 
     // Aliases the product page reads (seller / negotiable / images)
@@ -93,10 +94,11 @@ export async function GET(
 // PATCH /api/products/[id]
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!idSchema.safeParse(params.id).success) return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    const { id } = await params;
+    if (!idSchema.safeParse(id).success) return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     const supabase = await createServerClient();
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -119,7 +121,7 @@ export async function PATCH(
     const { data: product } = await supabase
       .from('products')
       .select('id, seller_id, status')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (!product) {
@@ -160,7 +162,7 @@ export async function PATCH(
     const { error: updateError } = await admin
       .from('products')
       .update(updates)
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (updateError) throw updateError;
 
@@ -169,7 +171,7 @@ export async function PATCH(
       actor_email: user.email,
       action: 'LISTING_UPDATED',
       entity_type: 'product',
-      entity_id: params.id,
+      entity_id: id,
       new_data: { updates: Object.keys(updates) },
     });
 
@@ -184,10 +186,11 @@ export async function PATCH(
 // DELETE /api/products/[id]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!idSchema.safeParse(params.id).success) return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    const { id } = await params;
+    if (!idSchema.safeParse(id).success) return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     const supabase = await createServerClient();
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -208,7 +211,7 @@ export async function DELETE(
     const { data: product } = await supabase
       .from('products')
       .select('id, seller_id, status')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (!product) {
@@ -228,14 +231,14 @@ export async function DELETE(
     await admin
       .from('products')
       .update({ status: 'ARCHIVED', updated_at: new Date().toISOString() })
-      .eq('id', params.id);
+      .eq('id', id);
 
     await admin.from('audit_logs').insert({
       actor_id: profile.id,
       actor_email: user.email,
       action: 'LISTING_DELETED',
       entity_type: 'product',
-      entity_id: params.id,
+      entity_id: id,
     });
 
     return NextResponse.json({ success: true });

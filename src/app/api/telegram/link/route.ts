@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getFastUser } from '@/lib/auth/session';
 import { rateLimit, LIMITS } from '@/lib/security/rateLimit';
 import { generateLinkCode, getBotUsername, LINK_CODE_TTL_MS, telegramConfigured } from '@/lib/telegram/link';
 
@@ -36,12 +37,14 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET /api/telegram/link — whether THIS account already has Telegram connected (for the settings page)
-export async function GET() {
+// GET /api/telegram/link — whether THIS account already has Telegram connected (polled every few seconds
+// while the connect popup is open, so this uses the fast local token check like other read paths do)
+export async function GET(request: NextRequest) {
   try {
     const supabase = await createServerClient();
-    const { data: { user }, error } = await supabase.auth.getUser();
-    if (error || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = await getFastUser(supabase);
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    { const limited = await rateLimit(request, LIMITS.read, user.id); if (limited) return limited; }
 
     const admin = createAdminClient();
     const { data: profile } = await admin.from('profiles').select('telegram_chat_id, telegram_username').eq('auth_user_id', user.id).single();
@@ -53,11 +56,12 @@ export async function GET() {
 }
 
 // DELETE /api/telegram/link — disconnect
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
   try {
     const supabase = await createServerClient();
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    { const limited = await rateLimit(request, LIMITS.telegramLink, user.id); if (limited) return limited; }
 
     const admin = createAdminClient();
     const { error: updateError } = await admin

@@ -68,7 +68,7 @@ export default async function RootLayout({
   let profile: Profile | null = null
   let isAdmin = false
   try {
-    const user = await getFastUser(createClient())
+    const user = await getFastUser(await createClient())
     if (user) {
       const row = await cached(`shell:${user.id}`, 15_000, async () => {
         const { data, error } = await createAdminClient().from('profiles').select('*, admin_roles!admin_roles_profile_id_fkey(role, is_active)').eq('auth_user_id', user.id).maybeSingle()
@@ -84,11 +84,13 @@ export default async function RootLayout({
     }
   } catch { /* signed out */ }
 
+  const initialCity = (await cityFromCookie()) ?? cityFromText(profile?.location)
+
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${jakarta.variable}`}>
       <body className="min-h-screen bg-canvas antialiased">
         <Providers>
-          <Suspense fallback={null}><NavigationProgress /></Suspense><WebVitals /><AuthProvider initialProfile={profile} initialIsAdmin={isAdmin}><CityProvider initialCity={cityFromCookie() ?? cityFromText(profile?.location)}>{children}<TelegramConnectPrompt /></CityProvider></AuthProvider></Providers>
+          <Suspense fallback={null}><NavigationProgress /></Suspense><WebVitals /><AuthProvider initialProfile={profile} initialIsAdmin={isAdmin}><CityProvider initialCity={initialCity}>{children}<TelegramConnectPrompt /></CityProvider></AuthProvider></Providers>
       </body>
     </html>
   )

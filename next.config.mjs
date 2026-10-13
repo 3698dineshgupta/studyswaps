@@ -26,8 +26,8 @@ const nextConfig = {
   experimental: {
     // Import only the icons / animation helpers that are used, not whole libraries
     optimizePackageImports: ['lucide-react', 'motion/react', '@tanstack/react-query'],
-    serverComponentsExternalPackages: ['sharp', 'ioredis', 'nodemailer'],
   },
+  serverExternalPackages: ['sharp', 'ioredis', 'nodemailer'],
   // The Content-Security-Policy (with its per-request nonce) is set in src/middleware.ts.
   headers: async () => [
     {

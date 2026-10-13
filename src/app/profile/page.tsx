@@ -20,7 +20,7 @@ export const dynamic = 'force-dynamic';
 const PRODUCT_FIELDS = 'id, title, price, original_price, condition, location, created_at, status, product_images(storage_path, is_primary), category:categories(name, slug)';
 
 export default async function ProfilePage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login?redirectTo=/profile');
 

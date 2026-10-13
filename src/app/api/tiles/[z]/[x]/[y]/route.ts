@@ -19,8 +19,9 @@ function inLaunchArea(z: number, x: number, y: number) {
   });
 }
 
-export async function GET(_req: NextRequest, { params }: { params: { z: string; x: string; y: string } }) {
-  const z = Number(params.z), x = Number(params.x), y = Number(params.y);
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ z: string; x: string; y: string }> }) {
+  const { z: zStr, x: xStr, y: yStr } = await params;
+  const z = Number(zStr), x = Number(xStr), y = Number(yStr);
   const ok = Number.isInteger(z) && Number.isInteger(x) && Number.isInteger(y) && z >= 10 && z <= 19 && x >= 0 && y >= 0 && x < 2 ** z && y < 2 ** z;
   if (!ok || !inLaunchArea(z, x, y)) return new Response('Tile not available here', { status: 404 });
 

@@ -13,6 +13,9 @@ export const MAX_DOCUMENT_BYTES = 8 * 1024 * 1024 // 8 MB — a phone photo of a
 
 export const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'] as const
 const ALLOWED_FORMATS = ['jpeg', 'png', 'webp']
+// Same cap as the general upload checker (lib/security/imageCheck.ts): stops a small, highly-compressed file from
+// decoding into a huge number of pixels ("decompression bomb") and burning CPU/memory before any size check can run.
+const MAX_IMAGE_PIXELS = 40_000_000
 
 /** Max verification uploads per user per hour. */
 export const MAX_ATTEMPTS_PER_HOUR = 8
@@ -43,7 +46,7 @@ export async function checkImage(file: File, opts: { maxBytes: number; minWidth?
   if (buffer.length > opts.maxBytes) return { ok: false, error: 'FILE_TOO_LARGE' }
 
   try {
-    const meta = await sharp(buffer, { failOn: 'error' }).metadata()
+    const meta = await sharp(buffer, { limitInputPixels: MAX_IMAGE_PIXELS, failOn: 'error' }).metadata()
     if (!meta.format || !ALLOWED_FORMATS.includes(meta.format)) {
       return { ok: false, error: 'INVALID_IMAGE' }
     }
@@ -59,7 +62,7 @@ export async function checkImage(file: File, opts: { maxBytes: number; minWidth?
 
 /** Re-encode to a clean JPEG: strips EXIF/GPS metadata and caps the size. */
 export function normalizeCapture(buffer: Buffer): Promise<Buffer> {
-  return sharp(buffer)
+  return sharp(buffer, { limitInputPixels: MAX_IMAGE_PIXELS })
     .rotate()
     .resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true })
     .jpeg({ quality: 88 })

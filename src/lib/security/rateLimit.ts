@@ -115,6 +115,7 @@ export const LIMITS = {
   withdraw: { name: 'withdraw', limit: 6, windowMs: 3_600_000 },
   identity: { name: 'identity', limit: 24, windowMs: 3_600_000 },
   telegramLink: { name: 'telegram-link', limit: 10, windowMs: 3_600_000 },
+  telegramWebhook: { name: 'telegram-webhook', limit: 60, windowMs: 60_000 },
   offer: { name: 'offer', limit: 20, windowMs: 3_600_000 },
   offerRespond: { name: 'offer-respond', limit: 40, windowMs: 3_600_000 },
   orderStatus: { name: 'order-status', limit: 60, windowMs: 60_000 },

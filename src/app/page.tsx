@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   // Kathmandu and Butwal shoppers each see their own city's listings
   const city = await resolveCityForUser(supabase);
 

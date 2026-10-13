@@ -19,8 +19,9 @@ const AMOUNT_ERROR: Record<string, string> = {
 
 // POST /api/offers/:id/respond — the SELLER accepts/rejects/counters a PENDING offer, or the BUYER
 // accepts/rejects a COUNTERED one. One response each; there is no further back-and-forth after that.
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const supabase = await createServerClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -36,8 +37,8 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     const { data: offer } = await admin
       .from('offers')
-      .select('id, product_id, buyer_id, seller_id, amount, status, products(title, price)')
-      .eq('id', params.id)
+      .select('id, product_id, buyer_id, seller_id, amount, counter_amount, status, products(title, price)')
+      .eq('id', id)
       .maybeSingle();
     if (!offer) return NextResponse.json({ error: 'Offer not found' }, { status: 404 });
 
@@ -92,8 +93,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       if (offer.status !== 'COUNTERED') return NextResponse.json({ error: 'There is nothing to respond to on this offer' }, { status: 409 });
       if (action === 'counter') return NextResponse.json({ error: 'You can accept or decline the seller\'s counter-offer' }, { status: 400 });
 
-      const { data: current } = await admin.from('offers').select('counter_amount').eq('id', offer.id).single();
-      const counterAmount = Number(current?.counter_amount ?? offer.amount);
+      const counterAmount = Number(offer.counter_amount ?? offer.amount);
 
       if (action === 'accept') {
         update = { status: 'ACCEPTED', amount: counterAmount, expires_at: new Date(Date.now() + OFFER_ACCEPT_WINDOW_MS).toISOString(), responded_at: new Date().toISOString() };

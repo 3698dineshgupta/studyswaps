@@ -35,7 +35,7 @@ export function shapeProduct(p: any) {
  */
 export const getProductForPage = cache(async (id: string) => {
   if (!UUID.test(id)) return null
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: p } = await supabase.from('products').select(SELECT).eq('id', id).maybeSingle()
   if (!p) return null
 

@@ -7,7 +7,7 @@
  *  3. Telegram calls our webhook with that chat's id; we look the code up and save the chat id on the profile.
  * From then on, `notify()` sends that profile a Telegram message for every notification, alongside email.
  */
-import { createHash, randomInt } from 'crypto'
+import { createHash, randomInt, timingSafeEqual } from 'crypto'
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const TELEGRAM_API_BASE = `https://api.telegram.org/bot${BOT_TOKEN}`
@@ -19,10 +19,17 @@ export function generateLinkCode(): string {
   return Array.from({ length: 8 }, () => '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'[randomInt(32)]).join('')
 }
 
-/** Verifies the `X-Telegram-Bot-Api-Secret-Token` header Telegram sends with every webhook call. */
+/** The secret Telegram echoes back in `X-Telegram-Bot-Api-Secret-Token` on every webhook call. */
 export function webhookSecretToken(): string {
   const base = process.env.APP_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || ''
   return createHash('sha256').update(`${base}:telegram-webhook`).digest('hex')
+}
+
+/** Constant-time check of the header above — a plain `!==` would leak the secret one byte at a time via timing. */
+export function verifyWebhookSecretToken(received: string | null): boolean {
+  const expected = Buffer.from(webhookSecretToken())
+  const actual = Buffer.from(received ?? '')
+  return expected.length === actual.length && timingSafeEqual(expected, actual)
 }
 
 let cachedUsername: string | null = null

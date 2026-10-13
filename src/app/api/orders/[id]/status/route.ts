@@ -44,8 +44,9 @@ const DESCRIPTIONS: Record<string, string> = {
 };
 
 // POST /api/orders/[id]/status — advance an order (buyer or seller, per the table above)
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const supabase = await createServerClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const { data: order } = await admin
       .from('orders')
       .select('id, order_number, status, buyer_id, seller_id')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
     if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
 
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const { data: moved, error: updateError } = await admin
       .from('orders')
       .update({ status: newStatus, ...(newStatus === 'CANCELLED' ? { cancelled_by: profile.id, cancelled_at: new Date().toISOString() } : {}) })
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('status', order.status)
       .select('id');
     if (updateError) throw updateError;
@@ -92,7 +93,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const { data: delivery } = await admin
       .from('deliveries')
       .update({ current_status: newStatus, ...(newStatus === 'DELIVERED' ? { actual_delivery: new Date().toISOString() } : {}) })
-      .eq('order_id', params.id)
+      .eq('order_id', id)
       .select('id')
       .maybeSingle();
 
@@ -109,16 +110,16 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     // Money: once the order is delivered (or the buyer confirms), the seller's held earnings become withdrawable
     let released: number | undefined;
     if (newStatus === 'DELIVERED' || newStatus === 'BUYER_CONFIRMED') {
-      const r = await releaseOrderFunds(admin, params.id);
+      const r = await releaseOrderFunds(admin, id);
       if (r.released) released = r.amount;
       else if (r.reason === 'rpc_failed') {
-        await admin.from('audit_logs').insert({ actor_id: profile.id, action: 'WALLET_RELEASE_FAILED', entity_type: 'order', entity_id: params.id });
+        await admin.from('audit_logs').insert({ actor_id: profile.id, action: 'WALLET_RELEASE_FAILED', entity_type: 'order', entity_id: id });
       }
     }
 
     // Tell the other party what happened
     const other = isBuyer ? order.seller_id : order.buyer_id;
-    const link = isBuyer ? '/dashboard/orders' : `/orders/${params.id}`;
+    const link = isBuyer ? '/dashboard/orders' : `/orders/${id}`;
     const extra = newStatus === 'DELIVERED' ? ` Please confirm that you received it.` : '';
     await notify(other, {
       type: newStatus === 'DELIVERED' || newStatus === 'OUT_FOR_DELIVERY' ? 'DELIVERY_UPDATE' : 'ORDER_UPDATE',
@@ -133,14 +134,14 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       actor_email: user.email,
       action: 'ORDER_STATUS_CHANGED',
       entity_type: 'order',
-      entity_id: params.id,
+      entity_id: id,
       new_data: { from: order.status, to: newStatus, actor: isBuyer ? 'buyer' : 'seller' },
     });
 
     TelegramService.sendAdminNotification(`📦 ORDER UPDATE\n\nOrder: ${order.order_number}\nStatus: ${order.status} → ${newStatus}\nBy: ${profile.full_name}`)
       .catch((e) => console.error('[Telegram] Order status notification failed:', e));
 
-    return NextResponse.json({ success: true, orderId: params.id, newStatus, released });
+    return NextResponse.json({ success: true, orderId: id, newStatus, released });
   } catch (error) {
     console.error('[API] Order status update error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

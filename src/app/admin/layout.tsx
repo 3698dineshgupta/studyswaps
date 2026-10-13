@@ -8,7 +8,7 @@ import { BrandMark } from '@/components/brand/Logo';
 import AdminNav from '@/components/admin/AdminNav';
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Signature-verified locally (no auth-server round trip) + ONE query for the role. Data behind the pages is
   // fetched through /api/admin/*, which checks the role again on every request.
