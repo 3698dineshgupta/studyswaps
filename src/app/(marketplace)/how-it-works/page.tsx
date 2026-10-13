@@ -58,7 +58,7 @@ const SELLER_STEPS: Step[] = [
   },
   {
     title: 'Verify your student ID, once',
-    body: <>Your device camera takes two live photos: the front of your student ID card, then a selfie holding it. Uploads from the gallery are not accepted. The photos are stored privately and reviewed by our team, usually within 24 hours.</>,
+    body: <>Upload a clear photo of one ID document — your school ID, college/university ID, citizenship certificate or national ID card — from your camera or your gallery. It is stored privately and reviewed by our team, usually within 24 hours.</>,
   },
   {
     title: 'List an item',
@@ -116,7 +116,7 @@ export default function HowItWorksPage() {
     ['Minimum withdrawal', formatPrice(WITHDRAWAL.minAmount), 'Sellers withdraw to eSewa only.'],
   ]
   const safety: { Icon: typeof BadgeCheck; title: string; text: string }[] = [
-    { Icon: BadgeCheck, title: 'Verified sellers', text: 'Every seller passes a live ID check, a photo of their student ID and a selfie holding it, before their first listing.' },
+    { Icon: BadgeCheck, title: 'Verified sellers', text: 'Every seller uploads a real ID document — school, college, citizenship or national ID — before their first listing.' },
     { Icon: Lock, title: 'Private ID photos', text: 'Verification photos are stored privately. Only you and the small team that reviews verification requests can see them, never other users.' },
     { Icon: Handshake, title: 'We stand in the middle', text: `${APP_NAME} is the mediator. The buyer's money is held by us, items travel through us, and buyers and sellers never see each other's address or phone number.` },
   ]

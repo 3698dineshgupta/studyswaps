@@ -3,17 +3,11 @@ import { z } from 'zod';
 import { createServerClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { TelegramService } from '@/lib/telegram/service';
-import { IDENTITY_BUCKET, IDENTITY_ERRORS } from '@/lib/identity';
+import { DOCUMENT_TYPE_IDS, IDENTITY_ERRORS } from '@/lib/identity';
 import { rateLimit, LIMITS } from '@/lib/security/rateLimit';
 
-const METHODS = {
-  college_id: 'COLLEGE_ID',
-  school_id: 'SCHOOL_ID',
-  selfie_with_id: 'SELFIE_WITH_ID',
-} as const;
-
 const bodySchema = z.object({
-  method: z.enum(['college_id', 'school_id', 'selfie_with_id']),
+  document_type: z.enum(DOCUMENT_TYPE_IDS as [string, ...string[]]),
   verification_id: z.string().uuid(),
   form: z.object({
     full_name: z.string().trim().min(2).max(100),
@@ -23,15 +17,15 @@ const bodySchema = z.object({
   }),
 });
 
-const CAPTURE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+const UPLOAD_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 const fail = (code: keyof typeof IDENTITY_ERRORS, message?: string) =>
   NextResponse.json({ error: message ?? IDENTITY_ERRORS[code].message, code }, { status: IDENTITY_ERRORS[code].status });
 
-// POST /api/verification/submit — JSON: { method, verification_id, form }
-// The photo was already captured live and stored by /api/identity-verification. This route only
+// POST /api/verification/submit — JSON: { document_type, verification_id, form }
+// The photo was already uploaded and stored by /api/identity-verification. This route only
 // *references* that server-created record by its verification id — it never accepts an image,
-// path or URL from the browser, and only the capture owner can submit it.
+// path or URL from the browser, and only the document's owner can submit it.
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createServerClient();
@@ -55,34 +49,27 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json({ error: 'Please fill in all required fields', details: parsed.error.flatten() }, { status: 400 });
     }
-    const { method, verification_id: verificationId, form } = parsed.data;
+    const { document_type: documentType, verification_id: verificationId, form } = parsed.data;
 
     const admin = createAdminClient();
 
-    // Look the capture up by (verification id AND the authenticated user): another user's id simply doesn't match
+    // Look the upload up by (verification id AND the authenticated user): another user's id simply doesn't match
     const { data: capture } = await admin
       .from('identity_verifications')
-      .select('id, status, captured_at, liveness_passed')
+      .select('id, status, captured_at')
       .eq('verification_id', verificationId)
       .eq('user_id', user.id)
       .maybeSingle();
 
-    if (!capture) return fail('INVALID_SESSION', 'We could not find your live photo. Please retake it.');
+    if (!capture) return fail('MISSING_DOCUMENT', 'We could not find your uploaded document. Please upload it again.');
     if (capture.status !== 'pending') return fail('ALREADY_USED');
-    if (!capture.liveness_passed) return fail('LIVENESS_FAILED');
-    if (Date.now() - new Date(capture.captured_at).getTime() > CAPTURE_MAX_AGE_MS) {
-      return fail('SESSION_EXPIRED', 'Your photo is too old. Please retake it.');
-    }
-
-    // The ID card front must be on file next to the selfie
-    const { data: files } = await admin.storage.from(IDENTITY_BUCKET).list(`${user.id}/${verificationId}`);
-    if (!files?.some((f) => f.name === 'id_front.jpg')) return fail('ID_CARD_MISSING');
+    if (Date.now() - new Date(capture.captured_at).getTime() > UPLOAD_MAX_AGE_MS) return fail('DOCUMENT_EXPIRED');
 
     const { data: created, error: requestError } = await admin
       .from('verification_requests')
       .insert({
         profile_id: profile.id,
-        method: METHODS[method],
+        method: documentType,
         status: 'PENDING',
         full_name: form.full_name,
         date_of_birth: form.date_of_birth || null,
@@ -94,16 +81,12 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (requestError || !created) {
-      // 23505 = this capture is already linked to a request
+      // 23505 = this upload is already linked to a request
       if (requestError?.code === '23505') return fail('ALREADY_USED');
       throw requestError;
     }
 
     await admin.from('identity_verifications').update({ status: 'under_review' }).eq('id', capture.id);
-
-    // The temporary copy of the card photo is no longer needed
-    const { data: temp } = await admin.storage.from(IDENTITY_BUCKET).list(`${user.id}/cards`);
-    if (temp?.length) await admin.storage.from(IDENTITY_BUCKET).remove(temp.map((f) => `${user.id}/cards/${f.name}`));
 
     await admin
       .from('profiles')
@@ -116,7 +99,7 @@ export async function POST(request: NextRequest) {
       action: 'VERIFICATION_SUBMITTED',
       entity_type: 'verification_request',
       entity_id: created.id,
-      new_data: { method: METHODS[method], identity_verification: verificationId },
+      new_data: { method: documentType, identity_verification: verificationId },
     });
 
     // Notify reviewers (no image is sent); queue a retry if Telegram is down
@@ -126,7 +109,7 @@ export async function POST(request: NextRequest) {
         verificationNumber: created.verification_number,
         fullName: form.full_name,
         college: form.college_name,
-        method: `${METHODS[method]} · live capture`,
+        method: `${documentType} · uploaded document`,
         studentId: form.student_id_number || 'N/A',
         submittedAt: new Date(created.submitted_at).toLocaleString('en-GB', { timeZone: 'Asia/Kathmandu' }),
       });

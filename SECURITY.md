@@ -55,7 +55,7 @@ Key fact: the anon key ships in the browser, so **the database API is a second f
 | S24 | LOW | Unused deps (`uuid`, `crypto-js`) with advisories | — | Removed; `sharp` → 0.35.4 | Fixed ✔ |
 | S25 | INFO | Cookies: session cookie must be readable by the browser client (not HttpOnly) — inherent to `@supabase/ssr` browser client | — | `SameSite=Lax`, `Secure` on HTTPS, CSP nonce reduces XSS risk | Accepted (R3) |
 
-**Verified good (no change needed):** eSewa verification (signature + amount + status API + idempotent claim), identity-verification capture (server-issued session, private bucket, liveness), order IDOR (404 for non-parties), photo ownership + traversal checks on listing create, geocoded addresses are HMAC-signed (fee can't be tampered), pricing computed only on the server, open redirects (`redirectTo`/`next` sanitised), no `dangerouslySetInnerHTML`/`eval`, secrets only in `.env.local` (git-ignored) and never in the browser bundle.
+**Verified good (no change needed):** eSewa verification (signature + amount + status API + idempotent claim), identity-verification document upload (server-validated image bytes, private bucket, content-type sniffing), order IDOR (404 for non-parties), photo ownership + traversal checks on listing create, geocoded addresses are HMAC-signed (fee can't be tampered), pricing computed only on the server, open redirects (`redirectTo`/`next` sanitised), no `dangerouslySetInnerHTML`/`eval`, secrets only in `.env.local` (git-ignored) and never in the browser bundle.
 
 ## 3. What you must do (I cannot do these for you)
 

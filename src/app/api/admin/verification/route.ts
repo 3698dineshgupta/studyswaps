@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
       .select(
         `*, profiles!verification_requests_profile_id_fkey(full_name, phone, location),
          verification_documents(id, document_type, storage_path),
-         identity_verifications!verification_requests_identity_verification_id_fkey(id, image_path, captured_at, challenge, liveness_score, liveness_passed, status)`,
+         identity_verifications!verification_requests_identity_verification_id_fkey(id, image_path, captured_at, status)`,
         { count: 'exact' }
       )
       .order('submitted_at', { ascending: false })
@@ -76,11 +76,10 @@ export async function GET(request: NextRequest) {
     const signed = paths.length ? (await admin.storage.from(BUCKET).createSignedUrls(paths, 120)).data ?? [] : [];
     const urlByPath = new Map(signed.map((s: any) => [s.path, s.signedUrl]));
 
-    // Live captures live in a separate PRIVATE bucket; links expire after 2 minutes
+    // Uploaded documents live in a separate PRIVATE bucket; links expire after 2 minutes
     const identityPaths = rows.map((r) => r.identity_verifications?.image_path).filter(Boolean) as string[];
-    const frontOf = (p: string) => p.replace(/identity_capture\.jpg$/, 'id_front.jpg');
     const identitySigned = identityPaths.length
-      ? (await admin.storage.from(IDENTITY_BUCKET).createSignedUrls([...identityPaths, ...identityPaths.map(frontOf)], 120)).data ?? []
+      ? (await admin.storage.from(IDENTITY_BUCKET).createSignedUrls(identityPaths, 120)).data ?? []
       : [];
     const identityUrl = new Map(identitySigned.map((s: any) => [s.path, s.signedUrl]));
 
@@ -97,17 +96,14 @@ export async function GET(request: NextRequest) {
 
     const requests = rows.map((r) => {
       const idv = r.identity_verifications;
-      const frontUrl = idv ? identityUrl.get(frontOf(idv.image_path)) : null;
+      // One uploaded document per request, labelled by which type the seller said it was
       const liveDoc = idv
-        ? [...(frontUrl ? [{ id: `${idv.id}-front`, document_type: 'ID_CARD_FRONT', storage_path: frontOf(idv.image_path), signed_url: frontUrl }] : []), {
+        ? [{
             id: idv.id,
-            document_type: 'LIVE_CAPTURE',
+            document_type: r.method,
             storage_path: idv.image_path,
             signed_url: identityUrl.get(idv.image_path) ?? null,
             captured_at: idv.captured_at,
-            challenge: idv.challenge,
-            liveness_score: idv.liveness_score,
-            liveness_passed: idv.liveness_passed,
           }]
         : [];
       return {
@@ -213,7 +209,7 @@ export async function POST(request: NextRequest) {
 
     await notify(vr.profile_id, approved
       ? { type: 'VERIFICATION_STATUS', title: "You're verified!", body: 'Your student identity was approved. You can now list items for sale and get paid on StudySwaps.', actionUrl: '/sell', email: { subject: 'You are verified on StudySwaps ✅', cta: 'Start selling' } }
-      : { type: 'VERIFICATION_STATUS', title: 'Verification needs attention', body: `Your verification was not approved${rejectionReason ? `: ${rejectionReason}` : ''}. You can submit a new live photo.`, actionUrl: '/verify', email: { subject: 'Your StudySwaps verification needs attention', cta: 'Try again' } });
+      : { type: 'VERIFICATION_STATUS', title: 'Verification needs attention', body: `Your verification was not approved${rejectionReason ? `: ${rejectionReason}` : ''}. You can upload a new document.`, actionUrl: '/verify', email: { subject: 'Your StudySwaps verification needs attention', cta: 'Try again' } });
 
     TelegramService.sendAdminNotification(
       `${approved ? '✅' : '❌'} VERIFICATION ${newStatus}\n\nRequest: ${vr.verification_number}\nStudent: ${vr.full_name}\nReviewer: ${reviewer.full_name}${

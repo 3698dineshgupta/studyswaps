@@ -88,7 +88,7 @@ const SECTIONS: { id: string; title: string; Icon: typeof FileText; body: ReactN
       <>
         <P>To keep the community safe, every <B>seller</B> is verified before their first listing. <B>Buyers do not need to verify their identity.</B> When you choose to sell, a short verification window opens and walks you through it.</P>
         <UL items={[
-          'You take a live photo of yourself and of your student ID with your device camera. Uploads from the gallery are not accepted.',
+          'You upload a clear photo of one ID document: your school ID, college/university ID, citizenship certificate or national ID card.',
           'Your photos are stored privately. They are visible only to you and to the small team that reviews verification requests — never to other users.',
           'We use them only to confirm who you are and to prevent fraud. We do not use them for advertising or sell them.',
           'A request can be approved, rejected with a reason, or sent back for a clearer photo. You can try again if it is rejected.',
@@ -247,7 +247,7 @@ const SECTIONS: { id: string; title: string; Icon: typeof FileText; body: ReactN
         <H>What we collect</H>
         <UL items={[
           'Account details: name, email, phone, college and profile photo.',
-          'Verification photos: your live selfie and student ID photo (private).',
+          'Verification photo: a photo of your ID document (private).',
           'Addresses: your delivery address and landmark as a buyer; the item\'s pickup address as a seller; and the map coordinates found by the address search.',
           'Activity: listings, cart, wishlist, orders, delivery updates, chats, notifications, and withdrawal requests (including the eSewa number you provide).',
           'Technical data needed to keep the service secure: sign-in session cookies and basic device / log information.',

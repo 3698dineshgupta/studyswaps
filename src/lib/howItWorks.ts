@@ -56,7 +56,7 @@ export const HOW_FAQ: FaqItem[] = [
   },
   {
     question: 'Do buyers need ID verification?',
-    answer: `No. Anyone can sign up and buy. Only sellers verify their identity, once, with two live photos: the front of their student ID card and a selfie holding it.`,
+    answer: `No. Anyone can sign up and buy. Only sellers verify their identity, once, by uploading a photo of one ID document — a school ID, college/university ID, citizenship certificate or national ID card.`,
     more: { label: 'Identity verification', href: '/policies#verification' },
   },
   {
